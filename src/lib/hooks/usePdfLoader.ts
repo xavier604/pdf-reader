@@ -29,16 +29,22 @@ export function usePdfLoader(pdfId: string): UsePdfLoaderResult {
 
         if (!blob) {
           setError("PDF not found");
-          setLoading(false);
           return;
         }
 
         const url = URL.createObjectURL(blob);
         blobUrlRef.current = url;
+
+        if (cancelled) {
+          URL.revokeObjectURL(url);
+          blobUrlRef.current = null;
+          return;
+        }
+
         setBlobUrl(url);
 
-        // Update last opened timestamp
-        await updatePdfMetadata(pdfId, { lastOpenedAt: Date.now() });
+        // Update last opened timestamp (non-critical, don't surface as load error)
+        updatePdfMetadata(pdfId, { lastOpenedAt: Date.now() }).catch(() => {});
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : "Failed to load PDF");

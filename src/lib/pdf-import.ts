@@ -36,14 +36,24 @@ export async function importPdfFile(file: File): Promise<string> {
     thumbnailBlob: null,
   };
 
-  const blob = new Blob([await file.arrayBuffer()], {
-    type: "application/pdf",
-  });
+  let blob: Blob;
+  try {
+    blob = new Blob([await file.arrayBuffer()], {
+      type: "application/pdf",
+    });
+  } catch (err) {
+    throw new Error(
+      `Failed to read file "${file.name}". The file may have been moved or deleted.`,
+      { cause: err },
+    );
+  }
 
   await addPdf(id, blob, metadata);
 
   // Fire-and-forget: generate thumbnail and page count in a single pass
-  processPdfMetadata(id, blob).catch(() => {});
+  processPdfMetadata(id, blob).catch((err) => {
+    console.error(`[pdf-import] Failed to generate thumbnail/page count for "${id}":`, err);
+  });
 
   return id;
 }

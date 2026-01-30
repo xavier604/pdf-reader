@@ -8,13 +8,17 @@ let enginePromise: Promise<PdfEngine<Blob>> | null = null;
 function getEngine(): Promise<PdfEngine<Blob>> {
   if (!enginePromise) {
     enginePromise = (async () => {
+      if (typeof WebAssembly === "undefined") {
+        throw new Error("WebAssembly is not supported in this browser");
+      }
       const { createPdfiumDirectEngine, DEFAULT_PDFIUM_WASM_URL } = await import(
         "@embedpdf/engines"
       );
       return createPdfiumDirectEngine(DEFAULT_PDFIUM_WASM_URL);
     })();
-    enginePromise.catch(() => {
+    enginePromise.catch((error) => {
       enginePromise = null;
+      throw new Error(`PDFium engine initialization failed: ${error?.message ?? error}`);
     });
   }
   return enginePromise;

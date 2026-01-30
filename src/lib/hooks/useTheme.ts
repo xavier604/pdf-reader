@@ -5,9 +5,13 @@ const STORAGE_KEY = "pdf-reader-theme";
 
 function getStoredTheme(): ThemePreference {
   if (typeof window === "undefined") return "system";
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === "light" || stored === "dark" || stored === "system") {
-    return stored;
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === "light" || stored === "dark" || stored === "system") {
+      return stored;
+    }
+  } catch {
+    // localStorage unavailable (e.g. Safari private browsing)
   }
   return "system";
 }
@@ -39,8 +43,12 @@ export function useTheme() {
 
   const setTheme = useCallback((newTheme: ThemePreference) => {
     setThemeState(newTheme);
-    if (typeof window !== "undefined") {
-      localStorage.setItem(STORAGE_KEY, newTheme);
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem(STORAGE_KEY, newTheme);
+      }
+    } catch {
+      // localStorage unavailable (e.g. Safari private browsing)
     }
   }, []);
 

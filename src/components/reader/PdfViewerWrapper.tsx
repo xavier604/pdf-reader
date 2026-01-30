@@ -33,11 +33,13 @@ export function PdfViewerWrapper({ pdfId, blobUrl, theme }: PdfViewerWrapperProp
       const zoomCap = registry.getPlugin("zoom")?.provides();
       const scrollCap = registry.getPlugin("scroll")?.provides();
 
+      if (!scrollCap) return;
+
       // Restore saved state once the initial layout is ready (per EmbedPDF docs).
       // The IndexedDB read MUST happen inside the handler because on repeat visits
       // the WASM engine is cached and onLayoutReady can fire before useEffect runs.
       // scrollToPage works any time after layout is ready, not just synchronously.
-      const unsubLayout = scrollCap?.onLayoutReady((event: any) => {
+      const unsubLayout = scrollCap.onLayoutReady((event: any) => {
         if (!event.isInitial || restoredRef.current) return;
         restoredRef.current = true;
 
@@ -48,7 +50,7 @@ export function PdfViewerWrapper({ pdfId, blobUrl, theme }: PdfViewerWrapperProp
           const docScroll = scrollCap.forDocument(documentId);
           const docZoom = zoomCap?.forDocument(documentId);
 
-          if (saved.zoomLevel > 0) {
+          if (saved.zoomLevel && saved.zoomLevel > 0) {
             // Restore zoom first. The zoom change triggers a re-layout, so we
             // must wait for it to settle before scrolling to the saved page.
             const unsub = zoomCap?.onZoomChange(() => {
@@ -70,21 +72,21 @@ export function PdfViewerWrapper({ pdfId, blobUrl, theme }: PdfViewerWrapperProp
           }
         });
       });
-      if (unsubLayout) unsubscribesRef.current.push(unsubLayout);
+      unsubscribesRef.current.push(unsubLayout);
 
       // Persist zoom changes
       const unsubZoom = zoomCap?.onZoomChange((event: any) => {
-        const currentPage = scrollCap?.getCurrentPage() ?? 1;
+        const currentPage = scrollCap.getCurrentPage() ?? 1;
         debouncedSaveState(currentPage, event.newZoom);
       });
       if (unsubZoom) unsubscribesRef.current.push(unsubZoom);
 
       // Persist page changes
-      const unsubPage = scrollCap?.onPageChange((event: any) => {
+      const unsubPage = scrollCap.onPageChange((event: any) => {
         const zoomState = zoomCap?.getState();
         debouncedSaveState(event.pageNumber, zoomState?.currentZoomLevel ?? 1);
       });
-      if (unsubPage) unsubscribesRef.current.push(unsubPage);
+      unsubscribesRef.current.push(unsubPage);
     },
     [pdfId, debouncedSaveState],
   );

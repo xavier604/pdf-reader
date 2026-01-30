@@ -1,7 +1,7 @@
 "use client";
 
 import { liveQuery } from "dexie";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { deletePdf, deletePdfs, getAllPdfMetadata } from "@/lib/db/pdf-store";
 import { importPdfFile } from "@/lib/pdf-import";
 import type { PdfMetadata } from "@/types";
@@ -11,15 +11,32 @@ export function useLibrary() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isImporting, setIsImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   // Subscribe to live query for reactive updates
   useEffect(() => {
-    const subscription = liveQuery(() => getAllPdfMetadata()).subscribe({
-      next: (result) => setAllPdfs(result),
-      error: (err) => setError(err.message ?? "Failed to load PDFs"),
-    });
+    let subscription: ReturnType<ReturnType<typeof liveQuery>["subscribe"]> | undefined;
+    try {
+      subscription = liveQuery(() => getAllPdfMetadata()).subscribe({
+        next: (result) => setAllPdfs(result),
+        error: (err) => {
+          const message = err instanceof Error ? err.message : "Failed to load PDFs";
+          setError(message);
+        },
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to load PDFs";
+      setError(message);
+    }
 
-    return () => subscription.unsubscribe();
+    return () => subscription?.unsubscribe();
   }, []);
 
   const pdfs = useMemo(() => {
@@ -52,6 +69,7 @@ export function useLibrary() {
     const errors: string[] = [];
 
     for (let i = 0; i < files.length; i++) {
+      if (!mountedRef.current) break;
       try {
         await importPdfFile(files[i]);
       } catch (err) {
@@ -59,6 +77,8 @@ export function useLibrary() {
         errors.push(message);
       }
     }
+
+    if (!mountedRef.current) return;
 
     setIsImporting(false);
 
