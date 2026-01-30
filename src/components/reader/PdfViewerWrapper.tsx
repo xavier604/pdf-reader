@@ -16,10 +16,8 @@ export function PdfViewerWrapper({ pdfId, blobUrl, theme }: PdfViewerWrapperProp
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const restoredRef = useRef(false);
   const unsubscribesRef = useRef<Array<() => void>>([]);
-  const lastStateRef = useRef({ page: 1, zoom: 1 });
   const debouncedSaveState = useCallback(
     (page: number, zoom: number) => {
-      lastStateRef.current = { page, zoom };
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       saveTimeoutRef.current = setTimeout(() => {
         saveReadingState(pdfId, { currentPage: page, zoomLevel: zoom });
@@ -48,13 +46,6 @@ export function PdfViewerWrapper({ pdfId, blobUrl, theme }: PdfViewerWrapperProp
         const documentId = event.documentId;
         getReadingState(pdfId).then((saved: any) => {
           if (!saved) return;
-
-          // Seed lastStateRef so unmount cleanup preserves restored state
-          // even if no onPageChange/onZoomChange fires before navigation.
-          lastStateRef.current = {
-            page: saved.currentPage ?? 1,
-            zoom: saved.zoomLevel ?? 1,
-          };
 
           const docScroll = scrollCap.forDocument(documentId);
           const docZoom = zoomCap?.forDocument(documentId);
@@ -100,7 +91,7 @@ export function PdfViewerWrapper({ pdfId, blobUrl, theme }: PdfViewerWrapperProp
     [pdfId, debouncedSaveState],
   );
 
-  // Save state and annotations on unmount
+  // Save annotations on unmount
   useEffect(() => {
     return () => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
@@ -108,12 +99,6 @@ export function PdfViewerWrapper({ pdfId, blobUrl, theme }: PdfViewerWrapperProp
         unsub();
       }
       unsubscribesRef.current = [];
-
-      // Flush the last known reading state immediately. We use the ref
-      // instead of querying the scroll/zoom plugins because they may
-      // already be torn down by the time this cleanup runs.
-      const { page, zoom } = lastStateRef.current;
-      saveReadingState(pdfId, { currentPage: page, zoomLevel: zoom });
 
       const registry = registryRef.current;
       if (!registry || registry.isDestroyed()) return;
