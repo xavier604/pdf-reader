@@ -1,6 +1,6 @@
 # PDF Reader
 
-A client-side PDF reader built with [Next.js](https://nextjs.org/) 15, [React](https://react.dev/) 19, and [EmbedPDF](https://embedpdf.com/). All PDF storage and rendering happens in the browser using IndexedDB — no backend required.
+A client-side PDF reader built with [Next.js](https://nextjs.org/) 16, [React](https://react.dev/) 19, and [EmbedPDF](https://embedpdf.com/). All PDF storage and rendering happens in the browser using IndexedDB — no backend required.
 
 ## Why
 
@@ -41,7 +41,7 @@ Most PDF readers either require a server, upload your files to the cloud, or lac
 ### Setup
 
 ```bash
-git clone https://github.com/<your-username>/pdf-reader.git
+git clone https://github.com/xavier604/pdf-reader.git
 cd pdf-reader
 pnpm install
 pnpm dev
@@ -95,7 +95,7 @@ Requires a modern browser with support for:
 - IndexedDB (PDF storage)
 - CSS custom properties (theming)
 
-Tested with Chromium-based browsers (Chrome, Edge, Arc). Firefox and Safari should work but are not covered by E2E tests.
+E2E tested with Chromium, Firefox, and WebKit (Safari).
 
 ## Credits
 
