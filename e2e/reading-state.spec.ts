@@ -7,7 +7,7 @@ async function getViewerPage(page: import("@playwright/test").Page): Promise<num
   return page.evaluate(() => {
     const embed = document.querySelector("embedpdf-container");
     if (!embed?.shadowRoot) return null;
-    const inputs = Array.from(embed.shadowRoot.querySelectorAll('input[type="text"]'));
+    const inputs = Array.from(embed.shadowRoot.querySelectorAll<HTMLInputElement>('input[type="text"]'));
     if (inputs.length < 2) return null;
     const val = parseInt(inputs[inputs.length - 1].value, 10);
     return val > 0 ? val : null;
