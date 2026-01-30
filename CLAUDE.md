@@ -84,3 +84,4 @@ Run `pnpm check` before committing.
 - **Shared types** live in `src/types/index.ts`
 - **PDF engine:** `@embedpdf/react-pdf-viewer` (drop-in viewer) + `@embedpdf/engines` (thumbnail generation)
 - **E2E tests** use production build (`pnpm build && pnpm start`) to avoid dev server chunk loading issues
+- **Webkit E2E failures are expected** — All webkit tests that go through the `importTestPdf` helper fail due to a pre-existing PDFium WebAssembly incompatibility with Playwright's webkit engine. Chromium and Firefox pass fully. Ignore these webkit failures when evaluating test runs.

@@ -19,11 +19,12 @@ npm-debug.log*
 # env
 .env*.local
 
-# playwright
+# test
 /test-results/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+/coverage/
 
 # context docs
 /context
