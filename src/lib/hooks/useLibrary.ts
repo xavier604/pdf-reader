@@ -2,18 +2,27 @@
 
 import { liveQuery } from "dexie";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  deletePdf,
-  deletePdfs,
-  getAllPdfMetadataSorted,
-  renamePdf,
-  toggleStarred,
-} from "@/lib/db/pdf-store";
+import { deletePdfs, getAllPdfMetadataSorted, renamePdf, toggleStarred } from "@/lib/db/pdf-store";
 import { importPdfFile } from "@/lib/pdf-import";
 import type { PdfMetadata, SortField, SortOrder } from "@/types";
 
+const SORT_STORAGE_KEY = "pdf-reader-sort";
+
 function getErrorMessage(err: unknown, fallback: string): string {
   return err instanceof Error ? err.message : fallback;
+}
+
+function getStoredSort(): { field: SortField; order: SortOrder } {
+  try {
+    const stored = localStorage.getItem(SORT_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed.field && parsed.order) return parsed;
+    }
+  } catch {
+    // localStorage unavailable
+  }
+  return { field: "lastOpenedAt", order: "desc" };
 }
 
 export function useLibrary() {
@@ -21,8 +30,8 @@ export function useLibrary() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isImporting, setIsImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sortField, setSortField] = useState<SortField>("lastOpenedAt");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+  const [sortField, setSortField] = useState<SortField>(() => getStoredSort().field);
+  const [sortOrder, setSortOrder] = useState<SortOrder>(() => getStoredSort().order);
   const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
   const [undoMessage, setUndoMessage] = useState<string | null>(null);
   const mountedRef = useRef(true);
@@ -126,9 +135,7 @@ export function useLibrary() {
     setPendingDeleteIds([]);
     setUndoMessage(null);
     try {
-      if (ids.length === 1) {
-        await deletePdf(ids[0]);
-      } else if (ids.length > 1) {
+      if (ids.length > 0) {
         await deletePdfs(ids);
       }
     } catch (err) {
@@ -139,6 +146,11 @@ export function useLibrary() {
   const handleSortChange = useCallback((field: SortField, order: SortOrder) => {
     setSortField(field);
     setSortOrder(order);
+    try {
+      localStorage.setItem(SORT_STORAGE_KEY, JSON.stringify({ field, order }));
+    } catch {
+      // localStorage unavailable
+    }
   }, []);
 
   const handleToggleStar = useCallback(async (id: string) => {
