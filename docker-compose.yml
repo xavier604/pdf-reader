@@ -1,9 +1,8 @@
 # Deployment-oriented compose file (uses pre-built GHCR image behind a reverse proxy).
-# Replace <your-username> with your GitHub username.
 # For local development, use: docker build -t pdf-reader . && docker run -p 3000:3000 pdf-reader
 services:
   pdf-reader:
-    image: ghcr.io/<your-username>/pdf-reader:latest
+    image: ghcr.io/xavier604/pdf-reader:latest
     container_name: pdf-reader
     restart: unless-stopped
     expose:
