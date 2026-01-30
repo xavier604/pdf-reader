@@ -23,19 +23,6 @@ export async function getPdfBlob(id: string): Promise<Blob | undefined> {
   }
 }
 
-export async function getPdfMetadata(id: string): Promise<PdfMetadata | undefined> {
-  try {
-    return await db.pdfMetadata.get(id);
-  } catch (error) {
-    console.error("getPdfMetadata failed:", error);
-    throw new Error("Failed to load PDF metadata. Database may be unavailable.");
-  }
-}
-
-export async function getAllPdfMetadata(): Promise<PdfMetadata[]> {
-  return getAllPdfMetadataSorted("lastOpenedAt", "desc");
-}
-
 export async function updatePdfMetadata(id: string, updates: Partial<PdfMetadata>): Promise<void> {
   try {
     await db.pdfMetadata.update(id, updates);
@@ -51,19 +38,6 @@ export async function updatePdfBlob(id: string, blob: Blob): Promise<void> {
   } catch (error) {
     console.error("updatePdfBlob failed:", error);
     throw new Error("Failed to update PDF file. Storage may be full or unavailable.");
-  }
-}
-
-export async function deletePdf(id: string): Promise<void> {
-  try {
-    await db.transaction("rw", [db.pdfFiles, db.pdfMetadata, db.readingState], async () => {
-      await db.pdfFiles.delete(id);
-      await db.pdfMetadata.delete(id);
-      await db.readingState.delete(id);
-    });
-  } catch (error) {
-    console.error("deletePdf failed:", error);
-    throw new Error("Failed to delete PDF. Database may be unavailable.");
   }
 }
 

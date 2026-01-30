@@ -3,8 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BulkActionBar } from "@/components/library/BulkActionBar";
-import { BulkDeleteConfirmDialog } from "@/components/library/BulkDeleteConfirmDialog";
-import { DeleteConfirmDialog } from "@/components/library/DeleteConfirmDialog";
 import { DropZone } from "@/components/library/DropZone";
 import { EmptyState } from "@/components/library/EmptyState";
 import { FileDetailsModal } from "@/components/library/FileDetailsModal";
@@ -12,6 +10,7 @@ import { PdfGrid } from "@/components/library/PdfGrid";
 import { SearchBar } from "@/components/library/SearchBar";
 import { SortMenu } from "@/components/library/SortMenu";
 import { StorageIndicator } from "@/components/library/StorageIndicator";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { KeyboardShortcutsDialog } from "@/components/shared/KeyboardShortcutsDialog";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { UndoToast } from "@/components/shared/UndoToast";
@@ -56,13 +55,6 @@ export function LibraryView() {
     fileInputRef.current?.click();
   }, []);
 
-  const handleFilesDropped = useCallback(
-    (files: FileList) => {
-      importFiles(files);
-    },
-    [importFiles],
-  );
-
   const handlePdfClick = useCallback(
     (id: string) => {
       router.push(`/reader/${id}`);
@@ -83,10 +75,6 @@ export function LibraryView() {
       setDeleteTarget(null);
     }
   }, [deleteTarget, removePdf]);
-
-  const handleCancelDelete = useCallback(() => {
-    setDeleteTarget(null);
-  }, []);
 
   const handleToggleSelect = useCallback((id: string) => {
     setSelectedIds((prev) => {
@@ -155,7 +143,7 @@ export function LibraryView() {
   const hasNoResults = pdfs.length === 0 && searchQuery.length > 0;
 
   return (
-    <DropZone onFilesDropped={handleFilesDropped} fileInputRef={fileInputRef}>
+    <DropZone onFilesDropped={importFiles} fileInputRef={fileInputRef}>
       {/* Header */}
       <header className="sticky top-0 z-20 bg-(--color-background)/95 backdrop-blur-sm border-b border-(--color-border)">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
@@ -306,17 +294,19 @@ export function LibraryView() {
       )}
 
       {/* Delete confirmation dialog */}
-      <DeleteConfirmDialog
+      <ConfirmDialog
         isOpen={deleteTarget !== null}
-        pdfTitle={deleteTarget?.title ?? ""}
+        title="Delete PDF?"
+        description={`Are you sure you want to delete \u201C${deleteTarget?.title ?? ""}\u201D?`}
         onConfirm={handleConfirmDelete}
-        onCancel={handleCancelDelete}
+        onCancel={() => setDeleteTarget(null)}
       />
 
       {/* Bulk delete confirmation dialog */}
-      <BulkDeleteConfirmDialog
+      <ConfirmDialog
         isOpen={bulkDeleteOpen}
-        count={selectedIds.size}
+        title={`Delete ${selectedIds.size} PDFs?`}
+        description={`Are you sure you want to delete ${selectedIds.size} ${selectedIds.size === 1 ? "PDF" : "PDFs"}?`}
         onConfirm={handleBulkDelete}
         onCancel={() => setBulkDeleteOpen(false)}
       />

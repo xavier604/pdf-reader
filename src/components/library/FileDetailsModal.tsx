@@ -1,6 +1,7 @@
 "use client";
 
-import { type MouseEvent, type SyntheticEvent, useEffect, useRef, useState } from "react";
+import { useBlobUrl } from "@/lib/hooks/useBlobUrl";
+import { useDialog } from "@/lib/hooks/useDialog";
 import { formatFileSize, formatRelativeDate } from "@/lib/utils";
 import type { PdfMetadata } from "@/types";
 
@@ -12,48 +13,8 @@ interface FileDetailsModalProps {
 }
 
 export function FileDetailsModal({ isOpen, pdf, onClose, onOpen }: FileDetailsModalProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-
-    if (isOpen) {
-      if (!dialog.open) dialog.showModal();
-    } else {
-      if (dialog.open) dialog.close();
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!pdf?.thumbnailBlob) {
-      setThumbnailUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(pdf.thumbnailBlob);
-    setThumbnailUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [pdf?.thumbnailBlob]);
-
-  const handleDialogClick = (e: MouseEvent<HTMLDialogElement>) => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-
-    const rect = dialog.getBoundingClientRect();
-    const isClickOutside =
-      e.clientX < rect.left ||
-      e.clientX > rect.right ||
-      e.clientY < rect.top ||
-      e.clientY > rect.bottom;
-
-    if (isClickOutside) onClose();
-  };
-
-  const handleCancel = (e: SyntheticEvent) => {
-    e.preventDefault();
-    onClose();
-  };
+  const { dialogRef, handleDialogClick, handleCancel } = useDialog(isOpen, onClose);
+  const thumbnailUrl = useBlobUrl(pdf?.thumbnailBlob);
 
   const displayTitle = pdf?.customTitle || pdf?.title || "";
 

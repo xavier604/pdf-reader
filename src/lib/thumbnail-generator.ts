@@ -16,9 +16,8 @@ function getEngine(): Promise<PdfEngine<Blob>> {
       );
       return createPdfiumDirectEngine(DEFAULT_PDFIUM_WASM_URL);
     })();
-    enginePromise.catch((error) => {
+    enginePromise.catch(() => {
       enginePromise = null;
-      throw new Error(`PDFium engine initialization failed: ${error?.message ?? error}`);
     });
   }
   return enginePromise;

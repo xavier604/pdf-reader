@@ -1,6 +1,5 @@
 "use client";
 
-import type React from "react";
 import type { ThemePreference } from "@/types";
 import { useThemeContext } from "./ThemeProvider";
 
@@ -80,7 +79,7 @@ function MonitorIcon() {
   );
 }
 
-const themeIcon: Record<ThemePreference, React.ReactNode> = {
+const themeIcon = {
   light: <SunIcon />,
   dark: <MoonIcon />,
   system: <MonitorIcon />,

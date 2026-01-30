@@ -1,6 +1,7 @@
 "use client";
 
-import { type MouseEvent, type ReactNode, type SyntheticEvent, useEffect, useRef } from "react";
+import type { ReactNode } from "react";
+import { useDialog } from "@/lib/hooks/useDialog";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -17,39 +18,7 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-
-    if (isOpen) {
-      if (!dialog.open) dialog.showModal();
-    } else {
-      if (dialog.open) dialog.close();
-    }
-  }, [isOpen]);
-
-  const handleDialogClick = (e: MouseEvent<HTMLDialogElement>) => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-
-    const rect = dialog.getBoundingClientRect();
-    const isClickOutside =
-      e.clientX < rect.left ||
-      e.clientX > rect.right ||
-      e.clientY < rect.top ||
-      e.clientY > rect.bottom;
-
-    if (isClickOutside) {
-      onCancel();
-    }
-  };
-
-  const handleCancel = (e: SyntheticEvent) => {
-    e.preventDefault();
-    onCancel();
-  };
+  const { dialogRef, handleDialogClick, handleCancel } = useDialog(isOpen, onCancel);
 
   return (
     <dialog

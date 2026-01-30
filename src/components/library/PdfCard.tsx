@@ -1,6 +1,7 @@
 "use client";
 
-import { type KeyboardEvent, type MouseEvent, useEffect, useState } from "react";
+import type { MouseEvent } from "react";
+import { useBlobUrl } from "@/lib/hooks/useBlobUrl";
 import { formatFileSize, formatRelativeDate, truncateFileName } from "@/lib/utils";
 import type { PdfMetadata } from "@/types";
 
@@ -25,14 +26,7 @@ export function PdfCard({
   onToggleStar,
   onShowDetails,
 }: PdfCardProps) {
-  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!pdf.thumbnailBlob) return;
-    const url = URL.createObjectURL(pdf.thumbnailBlob);
-    setThumbnailUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [pdf.thumbnailBlob]);
+  const thumbnailUrl = useBlobUrl(pdf.thumbnailBlob);
 
   const handleDelete = (e: MouseEvent) => {
     e.stopPropagation();
@@ -57,18 +51,10 @@ export function PdfCard({
     }
   };
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      handleClick();
-    }
-  };
-
   return (
     <button
       type="button"
       onClick={handleClick}
-      onKeyDown={handleKeyDown}
       className={`group relative bg-(--color-surface) rounded-xl overflow-hidden cursor-pointer transition-all duration-200 ${
         selected
           ? "ring-2 ring-(--color-accent) shadow-lg"
@@ -116,31 +102,17 @@ export function PdfCard({
           }`}
           aria-label={pdf.starred ? `Unstar ${pdf.title}` : `Star ${pdf.title}`}
         >
-          {pdf.starred ? (
-            <svg
-              aria-hidden="true"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="currentColor"
-              stroke="currentColor"
-              strokeWidth="1"
-            >
-              <path d="M8 1l2.2 4.4L15 6.3l-3.5 3.4.8 4.9L8 12.3l-4.3 2.3.8-4.9L1 6.3l4.8-.9L8 1z" />
-            </svg>
-          ) : (
-            <svg
-              aria-hidden="true"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.2"
-            >
-              <path d="M8 1l2.2 4.4L15 6.3l-3.5 3.4.8 4.9L8 12.3l-4.3 2.3.8-4.9L1 6.3l4.8-.9L8 1z" />
-            </svg>
-          )}
+          <svg
+            aria-hidden="true"
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill={pdf.starred ? "currentColor" : "none"}
+            stroke="currentColor"
+            strokeWidth={pdf.starred ? "1" : "1.2"}
+          >
+            <path d="M8 1l2.2 4.4L15 6.3l-3.5 3.4.8 4.9L8 12.3l-4.3 2.3.8-4.9L1 6.3l4.8-.9L8 1z" />
+          </svg>
         </button>
       )}
 

@@ -29,16 +29,11 @@ function resolveTheme(preference: ThemePreference): "light" | "dark" {
 }
 
 function applyThemeClass(resolved: "light" | "dark") {
-  if (typeof window === "undefined") return;
-  if (resolved === "dark") {
-    document.documentElement.classList.add("dark");
-  } else {
-    document.documentElement.classList.remove("dark");
-  }
+  document.documentElement.classList.toggle("dark", resolved === "dark");
 }
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<ThemePreference>(() => getStoredTheme());
+  const [theme, setThemeState] = useState<ThemePreference>(getStoredTheme);
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(() => resolveTheme(theme));
 
   const setTheme = useCallback((newTheme: ThemePreference) => {
@@ -52,8 +47,6 @@ export function useTheme() {
 
   // Apply resolved theme whenever theme preference changes
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
     const resolved = resolveTheme(theme);
     setResolvedTheme(resolved);
     applyThemeClass(resolved);
@@ -61,7 +54,6 @@ export function useTheme() {
 
   // Listen for system theme changes when preference is 'system'
   useEffect(() => {
-    if (typeof window === "undefined") return;
     if (theme !== "system") return;
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");

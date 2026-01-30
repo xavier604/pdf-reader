@@ -10,9 +10,7 @@ export async function saveReadingState(
 ): Promise<void> {
   await db.readingState.put({
     pdfId,
-    currentPage: state.currentPage,
-    totalPages: 0,
-    zoomLevel: state.zoomLevel,
+    ...state,
     updatedAt: Date.now(),
   });
 }

@@ -9,7 +9,6 @@ interface PdfFile {
 interface ReadingStateRecord {
   pdfId: string;
   currentPage: number;
-  totalPages: number;
   zoomLevel: number;
   updatedAt: number;
 }

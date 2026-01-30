@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 interface DropZoneProps {
   onFilesDropped: (files: FileList) => void;
@@ -9,20 +9,28 @@ interface DropZoneProps {
   children: React.ReactNode;
 }
 
+function filterPdfFiles(files: FileList): FileList {
+  const dataTransfer = new DataTransfer();
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+      dataTransfer.items.add(file);
+    }
+  }
+  return dataTransfer.files;
+}
+
 export function DropZone({ onFilesDropped, fileInputRef, children }: DropZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const [_dragCounter, setDragCounter] = useState(0);
+  const dragCounterRef = useRef(0);
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setDragCounter((prev) => {
-      const next = prev + 1;
-      if (next === 1) {
-        setIsDragging(true);
-      }
-      return next;
-    });
+    dragCounterRef.current += 1;
+    if (dragCounterRef.current === 1) {
+      setIsDragging(true);
+    }
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -33,24 +41,10 @@ export function DropZone({ onFilesDropped, fileInputRef, children }: DropZonePro
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setDragCounter((prev) => {
-      const next = prev - 1;
-      if (next === 0) {
-        setIsDragging(false);
-      }
-      return next;
-    });
-  }, []);
-
-  const filterPdfFiles = useCallback((files: FileList): FileList => {
-    const dataTransfer = new DataTransfer();
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
-        dataTransfer.items.add(file);
-      }
+    dragCounterRef.current -= 1;
+    if (dragCounterRef.current === 0) {
+      setIsDragging(false);
     }
-    return dataTransfer.files;
   }, []);
 
   const handleDrop = useCallback(
@@ -58,14 +52,14 @@ export function DropZone({ onFilesDropped, fileInputRef, children }: DropZonePro
       e.preventDefault();
       e.stopPropagation();
       setIsDragging(false);
-      setDragCounter(0);
+      dragCounterRef.current = 0;
 
       const pdfFiles = filterPdfFiles(e.dataTransfer.files);
       if (pdfFiles.length > 0) {
         onFilesDropped(pdfFiles);
       }
     },
-    [onFilesDropped, filterPdfFiles],
+    [onFilesDropped],
   );
 
   const handleFileInputChange = useCallback(

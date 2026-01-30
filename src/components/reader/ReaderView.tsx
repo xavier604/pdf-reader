@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { PdfViewerWrapper } from "@/components/reader/PdfViewerWrapper";
 import { useThemeContext } from "@/components/shared/ThemeProvider";
 import { useKeyboard } from "@/lib/hooks/useKeyboard";
@@ -20,14 +20,7 @@ export function ReaderView({ pdfId }: ReaderViewProps) {
     router.push("/");
   }, [router]);
 
-  const keyboardHandlers = useMemo(
-    () => ({
-      Escape: handleBack,
-    }),
-    [handleBack],
-  );
-
-  useKeyboard(keyboardHandlers);
+  useKeyboard({ Escape: handleBack });
 
   // Loading state
   if (pdfLoading) {

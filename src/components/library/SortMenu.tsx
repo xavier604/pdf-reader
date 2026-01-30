@@ -23,7 +23,7 @@ const DEFAULT_ORDERS: Record<SortField, SortOrder> = {
   fileSize: "desc",
 };
 
-const SORT_FIELDS: SortField[] = ["lastOpenedAt", "addedAt", "title", "fileSize"];
+const SORT_FIELDS = Object.keys(SORT_LABELS) as SortField[];
 
 export function SortMenu({ sortField, sortOrder, onSortChange }: SortMenuProps) {
   const [open, setOpen] = useState(false);

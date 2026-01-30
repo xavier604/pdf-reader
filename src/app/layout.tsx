@@ -9,25 +9,29 @@ export const viewport: Viewport = {
   ],
 };
 
+const APP_TITLE = "PDF Reader";
+const APP_DESCRIPTION =
+  "A client-side PDF reader built with Next.js and EmbedPDF. No backend required.";
+
 export const metadata: Metadata = {
-  title: "PDF Reader",
-  description: "A client-side PDF reader built with Next.js and EmbedPDF. No backend required.",
+  title: APP_TITLE,
+  description: APP_DESCRIPTION,
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "PDF Reader",
+    title: APP_TITLE,
   },
   openGraph: {
-    title: "PDF Reader",
-    description: "A client-side PDF reader built with Next.js and EmbedPDF. No backend required.",
+    title: APP_TITLE,
+    description: APP_DESCRIPTION,
     type: "website",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
-    title: "PDF Reader",
-    description: "A client-side PDF reader built with Next.js and EmbedPDF. No backend required.",
+    title: APP_TITLE,
+    description: APP_DESCRIPTION,
   },
 };
 
