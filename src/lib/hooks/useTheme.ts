@@ -44,9 +44,7 @@ export function useTheme() {
   const setTheme = useCallback((newTheme: ThemePreference) => {
     setThemeState(newTheme);
     try {
-      if (typeof window !== "undefined") {
-        localStorage.setItem(STORAGE_KEY, newTheme);
-      }
+      localStorage.setItem(STORAGE_KEY, newTheme);
     } catch {
       // localStorage unavailable (e.g. Safari private browsing)
     }

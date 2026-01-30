@@ -60,12 +60,5 @@ export async function importPdfFile(file: File): Promise<string> {
 
 async function processPdfMetadata(id: string, blob: Blob): Promise<void> {
   const { thumbnail, pageCount } = await generateThumbnailAndPageCount(blob);
-
-  const updates: Partial<PdfMetadata> = {};
-  if (thumbnail) updates.thumbnailBlob = thumbnail;
-  if (pageCount > 0) updates.pageCount = pageCount;
-
-  if (Object.keys(updates).length > 0) {
-    await updatePdfMetadata(id, updates);
-  }
+  await updatePdfMetadata(id, { thumbnailBlob: thumbnail, pageCount });
 }

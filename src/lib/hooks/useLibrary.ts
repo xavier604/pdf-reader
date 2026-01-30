@@ -52,8 +52,7 @@ export function useLibrary() {
     setIsImporting(true);
     setError(null);
     try {
-      const id = await importPdfFile(file);
-      return id;
+      return await importPdfFile(file);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to import file";
       setError(message);

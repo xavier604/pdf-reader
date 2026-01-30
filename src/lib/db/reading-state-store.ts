@@ -16,7 +16,3 @@ export async function saveReadingState(
     updatedAt: Date.now(),
   });
 }
-
-export async function deleteReadingState(pdfId: string): Promise<void> {
-  await db.readingState.delete(pdfId);
-}

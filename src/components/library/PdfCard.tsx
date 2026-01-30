@@ -24,15 +24,11 @@ export function PdfCard({
 }: PdfCardProps) {
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
 
-  // Create and revoke object URL for thumbnail
   useEffect(() => {
-    if (pdf.thumbnailBlob) {
-      const url = URL.createObjectURL(pdf.thumbnailBlob);
-      setThumbnailUrl(url);
-      return () => URL.revokeObjectURL(url);
-    } else {
-      setThumbnailUrl(null);
-    }
+    if (!pdf.thumbnailBlob) return;
+    const url = URL.createObjectURL(pdf.thumbnailBlob);
+    setThumbnailUrl(url);
+    return () => URL.revokeObjectURL(url);
   }, [pdf.thumbnailBlob]);
 
   const handleDelete = (e: React.MouseEvent) => {
