@@ -1,7 +1,6 @@
 "use client";
 
-import type React from "react";
-import { useEffect, useState } from "react";
+import { type KeyboardEvent, type MouseEvent, useEffect, useState } from "react";
 import { formatFileSize, formatRelativeDate, truncateFileName } from "@/lib/utils";
 import type { PdfMetadata } from "@/types";
 
@@ -12,6 +11,8 @@ interface PdfCardProps {
   selectionMode?: boolean;
   selected?: boolean;
   onToggleSelect?: () => void;
+  onToggleStar?: () => void;
+  onShowDetails?: () => void;
 }
 
 export function PdfCard({
@@ -21,6 +22,8 @@ export function PdfCard({
   selectionMode = false,
   selected = false,
   onToggleSelect,
+  onToggleStar,
+  onShowDetails,
 }: PdfCardProps) {
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
 
@@ -31,9 +34,19 @@ export function PdfCard({
     return () => URL.revokeObjectURL(url);
   }, [pdf.thumbnailBlob]);
 
-  const handleDelete = (e: React.MouseEvent) => {
+  const handleDelete = (e: MouseEvent) => {
     e.stopPropagation();
     onDelete();
+  };
+
+  const handleShowDetails = (e: MouseEvent) => {
+    e.stopPropagation();
+    onShowDetails?.();
+  };
+
+  const handleToggleStar = (e: MouseEvent) => {
+    e.stopPropagation();
+    onToggleStar?.();
   };
 
   const handleClick = () => {
@@ -44,7 +57,7 @@ export function PdfCard({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       handleClick();
@@ -91,29 +104,93 @@ export function PdfCard({
         </div>
       )}
 
-      {/* Delete button (visible on hover, hidden in selection mode) */}
+      {/* Star button (visible on hover or when starred, hidden in selection mode) */}
       {!selectionMode && (
         <button
           type="button"
-          onClick={handleDelete}
-          className="absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-(--color-surface)/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-(--color-danger) hover:text-white text-(--color-text-secondary)"
-          aria-label={`Delete ${pdf.title}`}
+          onClick={handleToggleStar}
+          className={`absolute top-2 left-2 z-10 p-1.5 rounded-lg bg-(--color-surface)/90 backdrop-blur-sm transition-opacity hover:text-amber-400 ${
+            pdf.starred
+              ? "text-amber-400"
+              : "text-(--color-text-secondary) opacity-0 group-hover:opacity-100"
+          }`}
+          aria-label={pdf.starred ? `Unstar ${pdf.title}` : `Star ${pdf.title}`}
         >
-          <svg
-            aria-hidden="true"
-            width="14"
-            height="14"
-            viewBox="0 0 14 14"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <line x1="2" y1="2" x2="12" y2="12" />
-            <line x1="12" y1="2" x2="2" y2="12" />
-          </svg>
+          {pdf.starred ? (
+            <svg
+              aria-hidden="true"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              stroke="currentColor"
+              strokeWidth="1"
+            >
+              <path d="M8 1l2.2 4.4L15 6.3l-3.5 3.4.8 4.9L8 12.3l-4.3 2.3.8-4.9L1 6.3l4.8-.9L8 1z" />
+            </svg>
+          ) : (
+            <svg
+              aria-hidden="true"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.2"
+            >
+              <path d="M8 1l2.2 4.4L15 6.3l-3.5 3.4.8 4.9L8 12.3l-4.3 2.3.8-4.9L1 6.3l4.8-.9L8 1z" />
+            </svg>
+          )}
         </button>
+      )}
+
+      {/* Info and delete buttons (visible on hover, hidden in selection mode) */}
+      {!selectionMode && (
+        <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
+          <button
+            type="button"
+            onClick={handleShowDetails}
+            className="p-1.5 rounded-lg bg-(--color-surface)/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-(--color-accent) hover:text-white text-(--color-text-secondary)"
+            aria-label={`Details for ${pdf.title}`}
+          >
+            <svg
+              aria-hidden="true"
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="7" cy="7" r="6" />
+              <line x1="7" y1="6.5" x2="7" y2="10" />
+              <circle cx="7" cy="4.5" r="0.5" fill="currentColor" stroke="none" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="p-1.5 rounded-lg bg-(--color-surface)/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-(--color-danger) hover:text-white text-(--color-text-secondary)"
+            aria-label={`Delete ${pdf.title}`}
+          >
+            <svg
+              aria-hidden="true"
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="2" y1="2" x2="12" y2="12" />
+              <line x1="12" y1="2" x2="2" y2="12" />
+            </svg>
+          </button>
+        </div>
       )}
 
       {/* Thumbnail area */}

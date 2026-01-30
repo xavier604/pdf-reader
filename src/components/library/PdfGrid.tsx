@@ -10,6 +10,8 @@ interface PdfGridProps {
   selectionMode?: boolean;
   selectedIds?: Set<string>;
   onToggleSelect?: (id: string) => void;
+  onToggleStar?: (id: string) => void;
+  onShowDetails?: (id: string) => void;
 }
 
 export function PdfGrid({
@@ -19,6 +21,8 @@ export function PdfGrid({
   selectionMode = false,
   selectedIds,
   onToggleSelect,
+  onToggleStar,
+  onShowDetails,
 }: PdfGridProps) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
@@ -31,6 +35,8 @@ export function PdfGrid({
           selectionMode={selectionMode}
           selected={selectedIds?.has(pdf.id) ?? false}
           onToggleSelect={() => onToggleSelect?.(pdf.id)}
+          onToggleStar={() => onToggleStar?.(pdf.id)}
+          onShowDetails={() => onShowDetails?.(pdf.id)}
         />
       ))}
     </div>

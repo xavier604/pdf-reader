@@ -1,5 +1,5 @@
 import { db } from "@/lib/db/schema";
-import type { PdfMetadata } from "@/types";
+import type { PdfMetadata, SortField, SortOrder } from "@/types";
 
 export async function addPdf(id: string, blob: Blob, metadata: PdfMetadata): Promise<void> {
   try {
@@ -33,12 +33,7 @@ export async function getPdfMetadata(id: string): Promise<PdfMetadata | undefine
 }
 
 export async function getAllPdfMetadata(): Promise<PdfMetadata[]> {
-  try {
-    return await db.pdfMetadata.orderBy("lastOpenedAt").reverse().toArray();
-  } catch (error) {
-    console.error("getAllPdfMetadata failed:", error);
-    throw new Error("Failed to load PDF library. Database may be unavailable.");
-  }
+  return getAllPdfMetadataSorted("lastOpenedAt", "desc");
 }
 
 export async function updatePdfMetadata(id: string, updates: Partial<PdfMetadata>): Promise<void> {
@@ -69,6 +64,61 @@ export async function deletePdf(id: string): Promise<void> {
   } catch (error) {
     console.error("deletePdf failed:", error);
     throw new Error("Failed to delete PDF. Database may be unavailable.");
+  }
+}
+
+export async function toggleStarred(id: string): Promise<void> {
+  try {
+    const metadata = await db.pdfMetadata.get(id);
+    if (!metadata) {
+      throw new Error(`PDF with id "${id}" not found.`);
+    }
+    const starred = !metadata.starred;
+    await db.pdfMetadata.update(id, { starred });
+  } catch (error) {
+    console.error("toggleStarred failed:", error);
+    throw new Error("Failed to toggle starred status. Database may be unavailable.");
+  }
+}
+
+export async function renamePdf(id: string, customTitle: string): Promise<void> {
+  try {
+    await db.pdfMetadata.update(id, { customTitle, title: customTitle });
+  } catch (error) {
+    console.error("renamePdf failed:", error);
+    throw new Error("Failed to rename PDF. Database may be unavailable.");
+  }
+}
+
+export async function getAllPdfMetadataSorted(
+  sortBy: SortField,
+  sortOrder: SortOrder,
+): Promise<PdfMetadata[]> {
+  try {
+    const items = await db.pdfMetadata.toArray();
+
+    const direction = sortOrder === "desc" ? -1 : 1;
+    let fieldCompare: (a: PdfMetadata, b: PdfMetadata) => number;
+
+    if (sortBy === "title") {
+      fieldCompare = (a, b) => a.title.localeCompare(b.title) * direction;
+    } else if (sortBy === "fileSize") {
+      fieldCompare = (a, b) => (a.fileSizeBytes - b.fileSizeBytes) * direction;
+    } else {
+      fieldCompare = (a, b) => (a[sortBy] - b[sortBy]) * direction;
+    }
+
+    // Single stable sort: starred items first, then by field
+    items.sort((a, b) => {
+      const starDiff = (b.starred ? 1 : 0) - (a.starred ? 1 : 0);
+      if (starDiff !== 0) return starDiff;
+      return fieldCompare(a, b);
+    });
+
+    return items;
+  } catch (error) {
+    console.error("getAllPdfMetadataSorted failed:", error);
+    throw new Error("Failed to load PDF library. Database may be unavailable.");
   }
 }
 

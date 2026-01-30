@@ -34,6 +34,8 @@ export async function importPdfFile(file: File): Promise<string> {
     addedAt: now,
     lastOpenedAt: now,
     thumbnailBlob: null,
+    starred: false,
+    customTitle: null,
   };
 
   let blob: Blob;

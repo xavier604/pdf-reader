@@ -27,6 +27,12 @@ class PdfReaderDB extends Dexie {
       pdfMetadata: "id, fileName, addedAt, lastOpenedAt",
       readingState: "pdfId",
     });
+
+    this.version(3).stores({
+      pdfFiles: "id",
+      pdfMetadata: "id, fileName, addedAt, lastOpenedAt, starred",
+      readingState: "pdfId",
+    });
   }
 }
 

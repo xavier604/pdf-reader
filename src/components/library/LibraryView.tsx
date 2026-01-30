@@ -7,11 +7,16 @@ import { BulkDeleteConfirmDialog } from "@/components/library/BulkDeleteConfirmD
 import { DeleteConfirmDialog } from "@/components/library/DeleteConfirmDialog";
 import { DropZone } from "@/components/library/DropZone";
 import { EmptyState } from "@/components/library/EmptyState";
+import { FileDetailsModal } from "@/components/library/FileDetailsModal";
 import { PdfGrid } from "@/components/library/PdfGrid";
 import { SearchBar } from "@/components/library/SearchBar";
+import { SortMenu } from "@/components/library/SortMenu";
 import { StorageIndicator } from "@/components/library/StorageIndicator";
+import { KeyboardShortcutsDialog } from "@/components/shared/KeyboardShortcutsDialog";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import { UndoToast } from "@/components/shared/UndoToast";
 import { useLibrary } from "@/lib/hooks/useLibrary";
+import type { PdfMetadata } from "@/types";
 
 export function LibraryView() {
   const router = useRouter();
@@ -25,6 +30,13 @@ export function LibraryView() {
     isImporting,
     error,
     clearError,
+    sortField,
+    sortOrder,
+    handleSortChange,
+    handleToggleStar,
+    undoMessage,
+    undoDelete,
+    dismissUndo,
   } = useLibrary();
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -37,6 +49,8 @@ export function LibraryView() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(false);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [detailsTarget, setDetailsTarget] = useState<PdfMetadata | null>(null);
 
   const handleOpenFileDialog = useCallback(() => {
     fileInputRef.current?.click();
@@ -108,10 +122,29 @@ export function LibraryView() {
     setBulkDeleteOpen(false);
   }, [selectedIds, removePdfs]);
 
+  const handleShowDetails = useCallback((id: string) => {
+    const pdf = pdfsRef.current.find((p) => p.id === id);
+    if (pdf) setDetailsTarget(pdf);
+  }, []);
+
+  const handleOpenFromDetails = useCallback(() => {
+    if (detailsTarget) {
+      router.push(`/reader/${detailsTarget.id}`);
+      setDetailsTarget(null);
+    }
+  }, [detailsTarget, router]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const tagName = target.tagName.toLowerCase();
+      if (tagName === "input" || tagName === "textarea" || target.isContentEditable) return;
+
       if (e.key === "Escape" && selectionMode) {
         handleCancelSelection();
+      }
+      if (e.key === "?") {
+        setShortcutsOpen(true);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -132,6 +165,11 @@ export function LibraryView() {
               <SearchBar value={searchQuery} onChange={setSearchQuery} />
             </div>
             <div className="flex items-center gap-2 shrink-0">
+              <SortMenu
+                sortField={sortField}
+                sortOrder={sortOrder}
+                onSortChange={handleSortChange}
+              />
               {pdfs.length > 0 && (
                 <button
                   type="button"
@@ -178,6 +216,8 @@ export function LibraryView() {
             selectionMode={selectionMode}
             selectedIds={selectedIds}
             onToggleSelect={handleToggleSelect}
+            onToggleStar={handleToggleStar}
+            onShowDetails={handleShowDetails}
           />
         )}
 
@@ -260,6 +300,11 @@ export function LibraryView() {
         </div>
       )}
 
+      {/* Undo toast */}
+      {undoMessage && (
+        <UndoToast message={undoMessage} onUndo={undoDelete} onDismiss={dismissUndo} />
+      )}
+
       {/* Delete confirmation dialog */}
       <DeleteConfirmDialog
         isOpen={deleteTarget !== null}
@@ -274,6 +319,17 @@ export function LibraryView() {
         count={selectedIds.size}
         onConfirm={handleBulkDelete}
         onCancel={() => setBulkDeleteOpen(false)}
+      />
+
+      {/* Keyboard shortcuts dialog */}
+      <KeyboardShortcutsDialog isOpen={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+
+      {/* File details modal */}
+      <FileDetailsModal
+        isOpen={detailsTarget !== null}
+        pdf={detailsTarget}
+        onClose={() => setDetailsTarget(null)}
+        onOpen={handleOpenFromDetails}
       />
     </DropZone>
   );

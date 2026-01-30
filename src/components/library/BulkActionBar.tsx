@@ -20,7 +20,7 @@ export function BulkActionBar({
   if (selectedCount === 0) return null;
 
   return (
-    <div className="sticky top-[73px] z-10 bg-(--color-surface) border-b border-(--color-border) px-4 sm:px-6 py-3">
+    <div className="sticky top-18.25 z-10 bg-(--color-surface) border-b border-(--color-border) px-4 sm:px-6 py-3">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium text-(--color-foreground)">

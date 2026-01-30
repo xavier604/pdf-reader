@@ -2,15 +2,29 @@
 
 import { liveQuery } from "dexie";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { deletePdf, deletePdfs, getAllPdfMetadata } from "@/lib/db/pdf-store";
+import {
+  deletePdf,
+  deletePdfs,
+  getAllPdfMetadataSorted,
+  renamePdf,
+  toggleStarred,
+} from "@/lib/db/pdf-store";
 import { importPdfFile } from "@/lib/pdf-import";
-import type { PdfMetadata } from "@/types";
+import type { PdfMetadata, SortField, SortOrder } from "@/types";
+
+function getErrorMessage(err: unknown, fallback: string): string {
+  return err instanceof Error ? err.message : fallback;
+}
 
 export function useLibrary() {
   const [allPdfs, setAllPdfs] = useState<PdfMetadata[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isImporting, setIsImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<SortField>("lastOpenedAt");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
+  const [undoMessage, setUndoMessage] = useState<string | null>(null);
   const mountedRef = useRef(true);
 
   useEffect(() => {
@@ -24,29 +38,30 @@ export function useLibrary() {
   useEffect(() => {
     let subscription: ReturnType<ReturnType<typeof liveQuery>["subscribe"]> | undefined;
     try {
-      subscription = liveQuery(() => getAllPdfMetadata()).subscribe({
+      subscription = liveQuery(() => getAllPdfMetadataSorted(sortField, sortOrder)).subscribe({
         next: (result) => setAllPdfs(result),
-        error: (err) => {
-          const message = err instanceof Error ? err.message : "Failed to load PDFs";
-          setError(message);
-        },
+        error: (err) => setError(getErrorMessage(err, "Failed to load PDFs")),
       });
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to load PDFs";
-      setError(message);
+      setError(getErrorMessage(err, "Failed to load PDFs"));
     }
 
     return () => subscription?.unsubscribe();
-  }, []);
+  }, [sortField, sortOrder]);
 
   const pdfs = useMemo(() => {
-    if (!searchQuery) return allPdfs;
+    let filtered = allPdfs;
+    if (pendingDeleteIds.length > 0) {
+      const pendingSet = new Set(pendingDeleteIds);
+      filtered = filtered.filter((p) => !pendingSet.has(p.id));
+    }
+    if (!searchQuery) return filtered;
     const query = searchQuery.toLowerCase();
-    return allPdfs.filter(
+    return filtered.filter(
       (pdf) =>
         pdf.title.toLowerCase().includes(query) || pdf.fileName.toLowerCase().includes(query),
     );
-  }, [allPdfs, searchQuery]);
+  }, [allPdfs, searchQuery, pendingDeleteIds]);
 
   const importFile = useCallback(async (file: File): Promise<string> => {
     setIsImporting(true);
@@ -54,8 +69,7 @@ export function useLibrary() {
     try {
       return await importPdfFile(file);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to import file";
-      setError(message);
+      setError(getErrorMessage(err, "Failed to import file"));
       throw err;
     } finally {
       setIsImporting(false);
@@ -72,7 +86,8 @@ export function useLibrary() {
       try {
         await importPdfFile(files[i]);
       } catch (err) {
-        const message = err instanceof Error ? err.message : `Failed to import ${files[i].name}`;
+        const message =
+          err instanceof Error ? err.message : `Failed to import ${files[i]?.name ?? "file"}`;
         errors.push(message);
       }
     }
@@ -86,21 +101,59 @@ export function useLibrary() {
     }
   }, []);
 
-  const removePdf = useCallback(async (id: string): Promise<void> => {
+  const removePdf = useCallback(
+    (id: string): void => {
+      const pdf = allPdfs.find((p) => p.id === id);
+      const title = pdf?.title ?? "PDF";
+      setPendingDeleteIds([id]);
+      setUndoMessage(`Deleted "${title}"`);
+    },
+    [allPdfs],
+  );
+
+  const removePdfs = useCallback((ids: string[]): void => {
+    setPendingDeleteIds(ids);
+    setUndoMessage(`Deleted ${ids.length} PDFs`);
+  }, []);
+
+  const undoDelete = useCallback(() => {
+    setPendingDeleteIds([]);
+    setUndoMessage(null);
+  }, []);
+
+  const dismissUndo = useCallback(async () => {
+    const ids = pendingDeleteIds;
+    setPendingDeleteIds([]);
+    setUndoMessage(null);
     try {
-      await deletePdf(id);
+      if (ids.length === 1) {
+        await deletePdf(ids[0]);
+      } else if (ids.length > 1) {
+        await deletePdfs(ids);
+      }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to delete PDF";
-      setError(message);
+      setError(getErrorMessage(err, "Failed to delete PDFs"));
+    }
+  }, [pendingDeleteIds]);
+
+  const handleSortChange = useCallback((field: SortField, order: SortOrder) => {
+    setSortField(field);
+    setSortOrder(order);
+  }, []);
+
+  const handleToggleStar = useCallback(async (id: string) => {
+    try {
+      await toggleStarred(id);
+    } catch (err) {
+      setError(getErrorMessage(err, "Failed to toggle star"));
     }
   }, []);
 
-  const removePdfs = useCallback(async (ids: string[]): Promise<void> => {
+  const handleRename = useCallback(async (id: string, title: string) => {
     try {
-      await deletePdfs(ids);
+      await renamePdf(id, title);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to delete PDFs";
-      setError(message);
+      setError(getErrorMessage(err, "Failed to rename PDF"));
     }
   }, []);
 
@@ -119,5 +172,13 @@ export function useLibrary() {
     isImporting,
     error,
     clearError,
+    sortField,
+    sortOrder,
+    handleSortChange,
+    handleToggleStar,
+    handleRename,
+    undoMessage,
+    undoDelete,
+    dismissUndo,
   };
 }

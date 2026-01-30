@@ -27,6 +27,13 @@ Most PDF readers either require a server, upload your files to the cloud, or lac
 - Full-featured reader with zoom, search, text selection, and annotations
 - Reading state persistence (page, zoom level) across sessions
 - Automatic thumbnail generation
+- Star/favorite PDFs to pin them at the top of the library
+- Sort library by last opened, date added, title, or file size
+- Undo delete with a timed toast notification
+- File details modal with metadata and thumbnail preview
+- Storage usage indicator with available quota display
+- Keyboard shortcuts (press `?` to see all shortcuts)
+- Bulk selection and deletion
 - Light/dark theme with system preference detection
 - Keyboard navigation (Escape to return to library)
 - Fully offline — all data stays in your browser
@@ -57,7 +64,9 @@ Open [http://localhost:3000](http://localhost:3000).
 | `pnpm build` | Production build |
 | `pnpm start` | Start production server |
 | `pnpm check` | Lint and format (Biome) |
+| `pnpm test` | Run unit tests (Vitest) |
 | `pnpm exec playwright test` | Run E2E tests |
+| `pnpm analyze` | Bundle analysis (opens in browser) |
 
 ## Docker
 
@@ -76,9 +85,9 @@ src/
 │   ├── page.tsx            # Library view (/)
 │   └── reader/[id]/        # Reader view (/reader/[id])
 ├── components/
-│   ├── library/            # PDF grid, cards, search, import
+│   ├── library/            # PDF grid, cards, search, import, sort, file details
 │   ├── reader/             # PDF viewer, reading state
-│   └── shared/             # Theme provider, error boundary
+│   └── shared/             # Theme, error boundary, dialogs, undo toast
 ├── lib/
 │   ├── db/                 # IndexedDB schema and CRUD
 │   ├── hooks/              # useLibrary, usePdfLoader, useTheme, useKeyboard

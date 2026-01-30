@@ -19,12 +19,7 @@ export function BulkDeleteConfirmDialog({
     <ConfirmDialog
       isOpen={isOpen}
       title={`Delete ${count} PDFs?`}
-      description={
-        <>
-          Are you sure you want to delete {count} {count === 1 ? "PDF" : "PDFs"}? This action cannot
-          be undone.
-        </>
-      }
+      description={`Are you sure you want to delete ${count} ${count === 1 ? "PDF" : "PDFs"}?`}
       onConfirm={onConfirm}
       onCancel={onCancel}
     />

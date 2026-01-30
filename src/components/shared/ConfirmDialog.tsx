@@ -1,12 +1,11 @@
 "use client";
 
-import type React from "react";
-import { useEffect, useRef } from "react";
+import { type MouseEvent, type ReactNode, type SyntheticEvent, useEffect, useRef } from "react";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
   title: string;
-  description: React.ReactNode;
+  description: ReactNode;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -31,7 +30,7 @@ export function ConfirmDialog({
     }
   }, [isOpen]);
 
-  const handleDialogClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+  const handleDialogClick = (e: MouseEvent<HTMLDialogElement>) => {
     const dialog = dialogRef.current;
     if (!dialog) return;
 
@@ -47,7 +46,7 @@ export function ConfirmDialog({
     }
   };
 
-  const handleCancel = (e: React.SyntheticEvent) => {
+  const handleCancel = (e: SyntheticEvent) => {
     e.preventDefault();
     onCancel();
   };

@@ -19,9 +19,7 @@ export function DeleteConfirmDialog({
     <ConfirmDialog
       isOpen={isOpen}
       title="Delete PDF?"
-      description={
-        <>Are you sure you want to delete &ldquo;{pdfTitle}&rdquo;? This action cannot be undone.</>
-      }
+      description={`Are you sure you want to delete \u201C${pdfTitle}\u201D?`}
       onConfirm={onConfirm}
       onCancel={onCancel}
     />
