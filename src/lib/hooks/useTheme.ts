@@ -1,0 +1,76 @@
+import { useCallback, useEffect, useState } from "react";
+import type { ThemePreference } from "@/types";
+
+const STORAGE_KEY = "pdf-reader-theme";
+
+function getStoredTheme(): ThemePreference {
+  if (typeof window === "undefined") return "system";
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored === "light" || stored === "dark" || stored === "system") {
+    return stored;
+  }
+  return "system";
+}
+
+function getSystemTheme(): "light" | "dark" {
+  if (typeof window === "undefined") return "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function resolveTheme(preference: ThemePreference): "light" | "dark" {
+  if (preference === "system") {
+    return getSystemTheme();
+  }
+  return preference;
+}
+
+function applyThemeClass(resolved: "light" | "dark") {
+  if (typeof window === "undefined") return;
+  if (resolved === "dark") {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+}
+
+export function useTheme() {
+  const [theme, setThemeState] = useState<ThemePreference>(() => getStoredTheme());
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(() => resolveTheme(theme));
+
+  const setTheme = useCallback((newTheme: ThemePreference) => {
+    setThemeState(newTheme);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, newTheme);
+    }
+  }, []);
+
+  // Apply resolved theme whenever theme preference changes
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const resolved = resolveTheme(theme);
+    setResolvedTheme(resolved);
+    applyThemeClass(resolved);
+  }, [theme]);
+
+  // Listen for system theme changes when preference is 'system'
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (theme !== "system") return;
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      const resolved = e.matches ? "dark" : "light";
+      setResolvedTheme(resolved);
+      applyThemeClass(resolved);
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => {
+      mediaQuery.removeEventListener("change", handleChange);
+    };
+  }, [theme]);
+
+  return { theme, resolvedTheme, setTheme };
+}
