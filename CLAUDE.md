@@ -62,9 +62,9 @@ CSS custom properties defined in `src/app/globals.css` with light/dark variants.
 2. Blob saved to IndexedDB
 3. Thumbnail and page count generated asynchronously (fire-and-forget) via EmbedPDF engine
 
-## Agent Usage
+## Agent Usage — MAXIMIZE PARALLELISM
 
-Use subagents (Task tool) whenever possible to parallelize work and reduce latency. Launch independent tasks concurrently in a single message.
+**Always use the maximum number of subagents (Task tool) possible to speed up work.** Launch every independent task concurrently in a single message — never run sequentially what can run in parallel. This includes file exploration, code searches, linting, testing, code reviews, and any other work that doesn't depend on a prior result. Reducing latency through aggressive parallelism is a top priority.
 
 ## Linting & Formatting
 
