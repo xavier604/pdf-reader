@@ -1,5 +1,8 @@
 # PDF Reader
 
+[![CI](https://github.com/xavier604/pdf-reader/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/xavier604/pdf-reader/actions/workflows/docker-publish.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 A client-side PDF reader built with [Next.js](https://nextjs.org/) 16, [React](https://react.dev/) 19, and [EmbedPDF](https://embedpdf.com/). All PDF storage and rendering happens in the browser using IndexedDB — no backend required.
 
 ## Why
