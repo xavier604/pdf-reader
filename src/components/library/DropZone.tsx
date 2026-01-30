@@ -4,7 +4,7 @@ import type React from "react";
 import { useCallback, useRef, useState } from "react";
 
 interface DropZoneProps {
-  onFilesDropped: (files: FileList) => void;
+  onFilesDropped: (files: File[]) => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   children: React.ReactNode;
 }
@@ -56,7 +56,7 @@ export function DropZone({ onFilesDropped, fileInputRef, children }: DropZonePro
 
       const pdfFiles = filterPdfFiles(e.dataTransfer.files);
       if (pdfFiles.length > 0) {
-        onFilesDropped(pdfFiles);
+        onFilesDropped(Array.from(pdfFiles));
       }
     },
     [onFilesDropped],
@@ -66,7 +66,8 @@ export function DropZone({ onFilesDropped, fileInputRef, children }: DropZonePro
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
       if (files && files.length > 0) {
-        onFilesDropped(files);
+        // Copy into a static array before resetting, since FileList is a live reference
+        onFilesDropped(Array.from(files));
       }
       // Reset input so the same file can be selected again
       e.target.value = "";

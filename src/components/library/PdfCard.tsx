@@ -52,9 +52,17 @@ export function PdfCard({
   };
 
   return (
-    <button
-      type="button"
+    // biome-ignore lint/a11y/useSemanticElements: native <button> cannot contain child <button> elements
+    <div
+      role="button"
+      tabIndex={0}
       onClick={handleClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleClick();
+        }
+      }}
       className={`group relative bg-(--color-surface) rounded-xl overflow-hidden cursor-pointer transition-all duration-200 ${
         selected
           ? "ring-2 ring-(--color-accent) shadow-lg"
@@ -211,6 +219,6 @@ export function PdfCard({
           </span>
         </div>
       </div>
-    </button>
+    </div>
   );
 }

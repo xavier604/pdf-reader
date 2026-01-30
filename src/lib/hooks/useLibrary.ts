@@ -85,7 +85,7 @@ export function useLibrary() {
     }
   }, []);
 
-  const importFiles = useCallback(async (files: FileList): Promise<void> => {
+  const importFiles = useCallback(async (files: File[]): Promise<void> => {
     setIsImporting(true);
     setError(null);
     const errors: string[] = [];
