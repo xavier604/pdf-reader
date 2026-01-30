@@ -17,7 +17,6 @@ test.describe("Reader View", () => {
     const container = page.locator('[data-testid="pdf-viewer-container"]');
     await expect(container).toBeVisible();
 
-    // The viewer should have rendered content inside the container
     const childCount = await container.locator("> *").count();
     expect(childCount).toBeGreaterThanOrEqual(1);
   });

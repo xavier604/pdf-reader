@@ -12,7 +12,6 @@ test.describe("Reader Advanced", () => {
   });
 
   test("loading state transitions to rendered PDF", async ({ page }) => {
-    // Navigate back and re-open to observe the transition
     await page.keyboard.press("Escape");
     await expect(page).toHaveURL("/");
 
@@ -23,7 +22,6 @@ test.describe("Reader Advanced", () => {
     await page.locator('p[title="test"]').first().click();
     await expect(page).toHaveURL(/\/reader\/.+/, { timeout: 10_000 });
 
-    // At least one of these must become visible
     const eitherVisible = await Promise.race([
       loadingLocator.waitFor({ state: "visible", timeout: 5_000 }).then(() => "loading"),
       viewerLocator.waitFor({ state: "visible", timeout: 5_000 }).then(() => "viewer"),
@@ -74,10 +72,8 @@ test.describe("Reader Advanced", () => {
       });
     }, corruptedId);
 
-    // Navigate to the corrupted PDF
     await page.goto(`/reader/${corruptedId}`);
 
-    // Wait for the viewer to attempt to load - it should show an error or the viewer container
     // EmbedPDF may show its own error, or the blob URL may work but content fails
     const viewerContainer = page.locator('[data-testid="pdf-viewer-container"]');
     await expect(viewerContainer).toBeVisible({ timeout: 30_000 });
@@ -89,7 +85,6 @@ test.describe("Reader Advanced", () => {
     const container = page.locator('[data-testid="pdf-viewer-container"]');
     await expect(container).toBeVisible();
 
-    // Navigate back and re-open
     await page.keyboard.press("Escape");
     await expect(page).toHaveURL("/");
     await openFirstPdf(page);

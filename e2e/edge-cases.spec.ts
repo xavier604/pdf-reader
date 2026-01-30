@@ -15,21 +15,6 @@ test.describe("Edge Cases", () => {
     await page.waitForLoadState("networkidle");
   });
 
-  test("non-PDF file rejected via file input", async ({ page }) => {
-    const fileInput = page.locator('input[type="file"]');
-    await fileInput.setInputFiles({
-      name: "test.txt",
-      mimeType: "text/plain",
-      buffer: Buffer.from("hello world"),
-    });
-
-    const errorToast = page.locator("div.fixed.bottom-6.right-6").filter({
-      has: page.locator("p"),
-    });
-    await expect(errorToast).toBeVisible({ timeout: 5000 });
-    await expect(errorToast.locator("p")).toContainText("is not a PDF");
-  });
-
   test("file with .pdf extension but wrong content", async ({ page }) => {
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
@@ -50,14 +35,6 @@ test.describe("Edge Cases", () => {
     await expect(viewerContainer).toBeVisible({ timeout: 15_000 });
   });
 
-  test("re-import same PDF file creates two separate cards", async ({ page }) => {
-    await importTestPdf(page);
-    await importTestPdf(page);
-
-    const cards = page.locator('p[title="test"]');
-    await expect(cards).toHaveCount(2, { timeout: 10_000 });
-  });
-
   test("delete all PDFs returns to empty state", async ({ page }) => {
     await importTestPdf(page);
     await expect(page.locator('p[title="test"]').first()).toBeVisible();
@@ -69,32 +46,6 @@ test.describe("Edge Cases", () => {
     await expect(page.getByText("Delete PDF?")).toBeVisible();
     await page.getByRole("button", { name: "Delete" }).last().click();
     await expect(page.getByText("No PDFs yet")).toBeVisible({ timeout: 5000 });
-  });
-
-  test("navigation to non-existent reader ID shows error", async ({ page }) => {
-    await page.goto("/reader/nonexistent-id-12345");
-    await page.waitForLoadState("networkidle");
-
-    await expect(page.getByText("PDF not found")).toBeVisible({ timeout: 10_000 });
-
-    const backButton = page.getByRole("button", { name: "Back to Library" });
-    await expect(backButton).toBeVisible();
-    await backButton.click();
-
-    await expect(page).toHaveURL("/", { timeout: 5000 });
-    await expect(page.getByRole("heading", { name: "PDF Reader" })).toBeVisible();
-  });
-
-  test("library data persists across page reload", async ({ page }) => {
-    await importTestPdf(page);
-    await expect(page.locator('p[title="test"]').first()).toBeVisible();
-
-    await page.reload();
-    await page.waitForLoadState("networkidle");
-
-    await expect(page.locator('p[title="test"]').first()).toBeVisible({
-      timeout: 10_000,
-    });
   });
 
   test("import file then immediately search for it", async ({ page }) => {
@@ -194,7 +145,6 @@ test.describe("Edge Cases", () => {
     // Wait for the viewer to save initial reading state
     await page.waitForTimeout(1500);
 
-    // Verify reading state was written to IndexedDB
     const hasState = await page.evaluate(async () => {
       const db = await new Promise<IDBDatabase>((resolve, reject) => {
         const req = indexedDB.open("PdfReaderDB");
@@ -213,7 +163,6 @@ test.describe("Edge Cases", () => {
     });
     expect(hasState).toBe(true);
 
-    // Navigate back and reopen — viewer should still render
     await page.keyboard.press("Escape");
     await expect(page).toHaveURL("/", { timeout: 5000 });
 

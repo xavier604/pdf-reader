@@ -66,9 +66,7 @@ test.describe("Accessibility & Dialog", () => {
     expect(count).toBeGreaterThan(0);
 
     for (let i = 0; i < count; i++) {
-      const button = buttons.nth(i);
-      const typeAttr = await button.getAttribute("type");
-      expect(typeAttr, `Button at index ${i} is missing a type attribute`).toBeTruthy();
+      const typeAttr = await buttons.nth(i).getAttribute("type");
       expect(
         typeAttr === "button" || typeAttr === "submit",
         `Button at index ${i} has type="${typeAttr}", expected "button" or "submit"`,

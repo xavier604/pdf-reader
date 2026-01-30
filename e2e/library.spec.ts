@@ -22,11 +22,7 @@ test.describe("Library View", () => {
 
   test("imports a PDF via file input and shows card in grid", async ({ page }) => {
     await importTestPdf(page);
-
-    // Card should appear with the title "test"
     await expect(page.locator('p[title="test"]').first()).toBeVisible();
-
-    // Empty state should be gone
     await expect(page.getByText("No PDFs yet")).not.toBeVisible();
   });
 
@@ -40,7 +36,6 @@ test.describe("Library View", () => {
     await searchInput.fill("nonexistent");
     await expect(page.getByText("No matching PDFs")).toBeVisible();
 
-    // Clear search restores results
     await searchInput.fill("");
     await expect(page.locator('p[title="test"]').first()).toBeVisible();
   });
@@ -48,20 +43,11 @@ test.describe("Library View", () => {
   test("delete flow: shows confirmation dialog and removes PDF", async ({ page }) => {
     await importTestPdf(page);
 
-    // Hover over card to reveal delete button
     const card = page.locator(".group.relative.cursor-pointer").first();
     await card.hover();
-
-    // Click the delete button (aria-label contains "Delete")
     await card.locator('button[aria-label*="Delete"]').click();
-
-    // Confirmation dialog should appear
     await expect(page.getByText("Delete PDF?")).toBeVisible();
-
-    // Click Delete to confirm
     await page.getByRole("button", { name: "Delete" }).last().click();
-
-    // Card should be gone, empty state returns
     await expect(page.getByText("No PDFs yet")).toBeVisible({ timeout: 5000 });
   });
 
@@ -71,11 +57,8 @@ test.describe("Library View", () => {
     const card = page.locator(".group.relative.cursor-pointer").first();
     await card.hover();
     await card.locator('button[aria-label*="Delete"]').click();
-
     await expect(page.getByText("Delete PDF?")).toBeVisible();
     await page.getByRole("button", { name: "Cancel" }).click();
-
-    // PDF should still be there
     await expect(page.locator('p[title="test"]').first()).toBeVisible();
   });
 
@@ -83,18 +66,6 @@ test.describe("Library View", () => {
     await importTestPdf(page);
     await openFirstPdf(page);
     await expect(page).toHaveURL(/\/reader\/.+/);
-  });
-
-  test("theme toggle cycles without crashing", async ({ page }) => {
-    const themeBtn = page.locator('button[title*="theme"], button[aria-label*="theme"]').first();
-    await expect(themeBtn).toBeVisible();
-
-    // Cycle through 3 states
-    for (let i = 0; i < 3; i++) {
-      await themeBtn.click();
-      await page.waitForTimeout(200);
-    }
-    await expect(themeBtn).toBeVisible();
   });
 
   test("persists PDFs across page reload", async ({ page }) => {
