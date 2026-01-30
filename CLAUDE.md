@@ -15,6 +15,7 @@ Client-side PDF reader built with Next.js 15 (App Router), React 19, and @embedp
 - `pnpm check` — Biome lint + format (auto-fix)
 - `pnpm exec playwright test` — Run E2E tests
 - `pnpm exec playwright test e2e/some-test.spec.ts` — Run a single E2E test
+- `pnpm exec playwright test --project=chromium` — Run E2E tests in Chromium only (faster iteration)
 
 ## Architecture
 
@@ -85,3 +86,11 @@ Run `pnpm check` before committing.
 - **PDF engine:** `@embedpdf/react-pdf-viewer` (drop-in viewer) + `@embedpdf/engines` (thumbnail generation)
 - **E2E tests** use production build (`pnpm build && pnpm start`) to avoid dev server chunk loading issues
 - **Webkit E2E failures are expected** — All webkit tests that go through the `importTestPdf` helper fail due to a pre-existing PDFium WebAssembly incompatibility with Playwright's webkit engine. Chromium and Firefox pass fully. Ignore these webkit failures when evaluating test runs.
+
+## Testing — Agent Guidelines
+
+When running E2E tests, optimize for speed on this machine:
+
+1. **Pre-build and reuse the server.** Before running tests, start the server in a background shell (`pnpm build && pnpm start`). Playwright's `reuseExistingServer` is enabled locally, so subsequent test runs skip the rebuild entirely.
+2. **Use `--project=chromium`** when iterating on code or debugging failures. Only run the full suite (chromium + firefox) for final verification.
+3. **Target specific spec files** when changes only affect a known area (e.g., `pnpm exec playwright test e2e/library.spec.ts --project=chromium`).
