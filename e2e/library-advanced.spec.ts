@@ -81,7 +81,7 @@ test.describe("Library Advanced", () => {
     await importTestPdf(page);
 
     // The card should exist
-    const card = page.locator("button.group.relative").first();
+    const card = page.locator('[role="button"].group.relative').first();
     await expect(card).toBeVisible();
 
     // Wait for the thumbnail img to appear (async thumbnail generation)
@@ -151,7 +151,7 @@ test.describe("Library Advanced", () => {
   test("card metadata display: file size and relative date shown", async ({ page }) => {
     await importTestPdf(page);
 
-    const card = page.locator("button.group.relative").first();
+    const card = page.locator('[role="button"].group.relative').first();
     await expect(card).toBeVisible();
 
     // The card should show the title

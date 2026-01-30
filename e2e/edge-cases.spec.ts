@@ -63,7 +63,7 @@ test.describe("Edge Cases", () => {
     await expect(page.locator('p[title="test"]').first()).toBeVisible();
     await expect(page.getByText("No PDFs yet")).not.toBeVisible();
 
-    const card = page.locator("button.group.relative").first();
+    const card = page.locator('[role="button"].group.relative').first();
     await card.hover();
     await card.locator('button[aria-label*="Delete"]').click();
     await expect(page.getByText("Delete PDF?")).toBeVisible();
@@ -224,7 +224,7 @@ test.describe("Edge Cases", () => {
   test("last opened timestamp updates after viewing", async ({ page }) => {
     await importTestPdf(page);
 
-    const card = page.locator("button.group.relative").first();
+    const card = page.locator('[role="button"].group.relative').first();
     const initialDateText = await card.locator(".p-3 span.text-xs").last().textContent();
 
     expect(initialDateText).toBe("just now");
@@ -236,7 +236,7 @@ test.describe("Edge Cases", () => {
     await page.keyboard.press("Escape");
     await expect(page).toHaveURL("/", { timeout: 5000 });
 
-    const updatedCard = page.locator("button.group.relative").first();
+    const updatedCard = page.locator('[role="button"].group.relative').first();
     const updatedDateText = await updatedCard.locator(".p-3 span.text-xs").last().textContent();
 
     expect(updatedDateText).toBe("just now");

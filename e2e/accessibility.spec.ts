@@ -12,7 +12,7 @@ test.describe("Accessibility & Dialog", () => {
   test("delete dialog is dismissed by pressing Escape", async ({ page }) => {
     await importTestPdf(page);
 
-    const card = page.locator("button.group.relative").first();
+    const card = page.locator('[role="button"].group.relative').first();
     await card.hover();
     await card.locator('button[aria-label*="Delete"]').click();
     await expect(page.getByText("Delete PDF?")).toBeVisible();
@@ -24,7 +24,7 @@ test.describe("Accessibility & Dialog", () => {
   test("delete dialog is dismissed by clicking the backdrop", async ({ page }) => {
     await importTestPdf(page);
 
-    const card = page.locator("button.group.relative").first();
+    const card = page.locator('[role="button"].group.relative').first();
     await card.hover();
     await card.locator('button[aria-label*="Delete"]').click();
     await expect(page.getByText("Delete PDF?")).toBeVisible();
@@ -42,7 +42,7 @@ test.describe("Accessibility & Dialog", () => {
   test("PDF card keyboard activation with Enter", async ({ page }) => {
     await importTestPdf(page);
 
-    const card = page.locator("button.group.relative").first();
+    const card = page.locator('[role="button"].group.relative').first();
     await card.focus();
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL(/\/reader\/.+/, { timeout: 10_000 });
@@ -51,7 +51,7 @@ test.describe("Accessibility & Dialog", () => {
   test("PDF card keyboard activation with Space", async ({ page }) => {
     await importTestPdf(page);
 
-    const card = page.locator("button.group.relative").first();
+    const card = page.locator('[role="button"].group.relative').first();
     await card.focus();
     await page.keyboard.press("Space");
     await expect(page).toHaveURL(/\/reader\/.+/, { timeout: 10_000 });
@@ -114,7 +114,7 @@ test.describe("Accessibility & Dialog", () => {
     await themeToggle.focus();
     await expect(themeToggle).toBeFocused();
 
-    const card = page.locator("button.group.relative").first();
+    const card = page.locator('[role="button"].group.relative').first();
     await card.focus();
     await expect(card).toBeFocused();
   });
@@ -124,7 +124,7 @@ test.describe("Accessibility & Dialog", () => {
     await expect(page.locator('p[title="test"]').first()).toBeVisible();
 
     // Delete button
-    const card = page.locator("button.group.relative").first();
+    const card = page.locator('[role="button"].group.relative').first();
     await card.hover();
     const deleteButton = card.locator('button[aria-label*="Delete"]');
     await expect(deleteButton).toHaveAttribute("aria-label", /Delete/);

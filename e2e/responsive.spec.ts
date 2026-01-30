@@ -23,7 +23,7 @@ test.describe("Responsive Design - Mobile (375x667)", () => {
     expect(headerBox!.x).toBeGreaterThanOrEqual(0);
     expect(headerBox!.x + headerBox!.width).toBeLessThanOrEqual(375);
 
-    const card = page.locator("button.group").first();
+    const card = page.locator('[role="button"].group').first();
     const cardBox = await card.boundingBox();
     expect(cardBox).not.toBeNull();
     expect(cardBox!.x).toBeGreaterThanOrEqual(0);
@@ -70,7 +70,7 @@ test.describe("Responsive Design - Tablet (768x1024)", () => {
     await importTestPdf(page);
     await importTestPdf(page);
 
-    const cards = page.locator("button.group");
+    const cards = page.locator('[role="button"].group');
     await expect(cards).toHaveCount(3, { timeout: 15_000 });
 
     const firstCardBox = await cards.nth(0).boundingBox();
@@ -106,7 +106,7 @@ test.describe("Responsive Design - Desktop (1280x800)", () => {
     await importTestPdf(page);
     await importTestPdf(page);
 
-    const cards = page.locator("button.group");
+    const cards = page.locator('[role="button"].group');
     await expect(cards).toHaveCount(4, { timeout: 15_000 });
 
     const firstBox = await cards.nth(0).boundingBox();
