@@ -2,6 +2,7 @@
   "name": "pdf-reader",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.28.2",
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
