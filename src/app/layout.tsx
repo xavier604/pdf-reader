@@ -11,9 +11,10 @@ export const viewport: Viewport = {
 
 const APP_TITLE = "PDF Reader";
 const APP_DESCRIPTION =
-  "A client-side PDF reader built with Next.js and EmbedPDF. No backend required.";
+  "Privacy-first PDF reader that runs entirely in your browser. No uploads, no backend — view, annotate, and store PDFs client-side with IndexedDB. Self-hostable with Docker.";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://pdf-reader-gamma.vercel.app"),
   title: APP_TITLE,
   description: APP_DESCRIPTION,
   manifest: "/manifest.json",
@@ -27,11 +28,19 @@ export const metadata: Metadata = {
     description: APP_DESCRIPTION,
     type: "website",
     locale: "en_US",
+    url: "https://pdf-reader-gamma.vercel.app",
+    images: [
+      {
+        url: "/og-image.png",
+        alt: "PDF Reader — privacy-first client-side PDF viewer",
+      },
+    ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: APP_TITLE,
     description: APP_DESCRIPTION,
+    images: ["/og-image.png"],
   },
 };
 
