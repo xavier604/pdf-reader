@@ -14,10 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - PDF dark mode preference persistence in localStorage
 - Custom hook `usePdfDarkMode` for managing PDF-specific theme state
 - E2E test coverage for PDF dark mode functionality
+- Help button in library header for keyboard shortcuts discoverability
 
 ### Fixed
 
 - PWA manifest validation errors for install UI
+- PDF dark mode color matching with app theme background
 
 ## [1.0.0] - 2025-06-15
 

@@ -77,4 +77,41 @@ test.describe("Library View", () => {
 
     await expect(page.locator('p[title="test"]').first()).toBeVisible({ timeout: 5000 });
   });
+
+  test("help button opens keyboard shortcuts dialog", async ({ page }) => {
+    // Verify help button is visible in header
+    const helpButton = page.getByRole("button", { name: "Keyboard shortcuts" });
+    await expect(helpButton).toBeVisible();
+
+    // Click help button
+    await helpButton.click();
+
+    // Verify dialog opens with heading
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole("heading", { name: "Keyboard Shortcuts" })).toBeVisible();
+
+    // Verify shortcuts are displayed
+    await expect(dialog.getByText("Go back / Close dialog")).toBeVisible();
+    await expect(dialog.getByText("Show keyboard shortcuts")).toBeVisible();
+    await expect(dialog.getByText("Open selected PDF")).toBeVisible();
+
+    // Close dialog with button
+    await dialog.getByRole("button", { name: "Close" }).click();
+    await expect(dialog).not.toBeVisible();
+  });
+
+  test("keyboard shortcuts dialog opens with ? key", async ({ page }) => {
+    // Press ? key
+    await page.keyboard.press("?");
+
+    // Verify dialog opens with heading
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole("heading", { name: "Keyboard Shortcuts" })).toBeVisible();
+
+    // Close with Escape key
+    await page.keyboard.press("Escape");
+    await expect(dialog).not.toBeVisible();
+  });
 });

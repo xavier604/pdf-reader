@@ -174,6 +174,28 @@ export function LibraryView() {
               >
                 Open PDF
               </button>
+              <button
+                type="button"
+                onClick={() => setShortcutsOpen(true)}
+                className="p-2 rounded-lg bg-(--color-surface-hover) text-(--color-foreground) hover:bg-(--color-border) transition-colors focus:outline-none focus:ring-2 focus:ring-(--color-accent)"
+                aria-label="Keyboard shortcuts"
+              >
+                <svg
+                  aria-hidden="true"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="10" cy="10" r="8" />
+                  <path d="M7.5 7.5a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3" />
+                  <circle cx="10" cy="14" r="0.5" fill="currentColor" />
+                </svg>
+              </button>
               <ThemeToggle />
             </div>
           </div>
