@@ -63,10 +63,6 @@ CSS custom properties defined in `src/app/globals.css` with light/dark variants.
 2. Blob saved to IndexedDB
 3. Thumbnail and page count generated asynchronously (fire-and-forget) via EmbedPDF engine
 
-## Agent Usage — MAXIMIZE PARALLELISM
-
-**Always use the maximum number of subagents (Task tool) possible to speed up work.** Launch every independent task concurrently in a single message — never run sequentially what can run in parallel. This includes file exploration, code searches, linting, testing, code reviews, and any other work that doesn't depend on a prior result. Reducing latency through aggressive parallelism is a top priority.
-
 ## Linting & Formatting
 
 Biome (v2) handles both linting and formatting. Config is in `biome.json`.
@@ -85,12 +81,3 @@ Run `pnpm check` before committing.
 - **Shared types** live in `src/types/index.ts`
 - **PDF engine:** `@embedpdf/react-pdf-viewer` (drop-in viewer) + `@embedpdf/engines` (thumbnail generation)
 - **E2E tests** use production build (`pnpm build && pnpm start`) to avoid dev server chunk loading issues
-- **Webkit E2E failures are expected** — All webkit tests that go through the `importTestPdf` helper fail due to a pre-existing PDFium WebAssembly incompatibility with Playwright's webkit engine. Chromium and Firefox pass fully. Ignore these webkit failures when evaluating test runs.
-
-## Testing — Agent Guidelines
-
-When running E2E tests, optimize for speed on this machine:
-
-1. **Pre-build and reuse the server.** Before running tests, start the server in a background shell (`pnpm build && pnpm start`). Playwright's `reuseExistingServer` is enabled locally, so subsequent test runs skip the rebuild entirely.
-2. **Use `--project=chromium`** when iterating on code or debugging failures. Only run the full suite (chromium + firefox) for final verification.
-3. **Target specific spec files** when changes only affect a known area (e.g., `pnpm exec playwright test e2e/library.spec.ts --project=chromium`).

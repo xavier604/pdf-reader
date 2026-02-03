@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
+import { SerwistProvider } from "./serwist";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -48,7 +49,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <SerwistProvider swUrl="/serwist/sw.js" reloadOnOnline={false}>
+          <ThemeProvider>{children}</ThemeProvider>
+        </SerwistProvider>
       </body>
     </html>
   );
