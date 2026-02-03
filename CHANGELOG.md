@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- PWA manifest screenshots for mobile and desktop form factors
+- PDF dark mode toggle in reader view that inverts document colors for comfortable reading in low light
+- PDF dark mode preference persistence in localStorage
+- Custom hook `usePdfDarkMode` for managing PDF-specific theme state
+- E2E test coverage for PDF dark mode functionality
+
+### Fixed
+
+- PWA manifest validation errors for install UI
+
 ## [1.0.0] - 2025-06-15
 
 ### Added

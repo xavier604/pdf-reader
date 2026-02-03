@@ -30,6 +30,7 @@ Most PDF readers either require a server, upload your files to the cloud, or lac
 
 - Import PDFs via file picker or drag-and-drop
 - Full-featured reader with zoom, search, text selection, and annotations
+- PDF dark mode — inverts PDF colors for comfortable reading in low light (independent of app theme)
 - Reading state persistence (page, zoom level) across sessions
 - Automatic thumbnail generation
 - Star/favorite PDFs to pin them at the top of the library
