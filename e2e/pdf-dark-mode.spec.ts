@@ -110,9 +110,8 @@ test.describe("PDF Dark Mode", () => {
       return window.getComputedStyle(pdfContainer).filter;
     });
 
-    // The filter should contain "invert" and "hue-rotate"
+    // The filter should contain "invert"
     expect(contentFilter).toContain("invert");
-    expect(contentFilter).toContain("hue-rotate");
   });
 
   test("dark mode works independently of app theme", async ({ page }) => {

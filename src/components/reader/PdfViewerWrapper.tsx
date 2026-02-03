@@ -31,7 +31,8 @@ function applyDarkModeFilter(container: HTMLElement, enabled: boolean): boolean 
 
   if (pdfContainer) {
     if (enabled) {
-      (pdfContainer as HTMLElement).style.filter = "invert(1) hue-rotate(180deg)";
+      // invert(0.96) makes white (#ffffff) → #0a0a0a to match app theme
+      (pdfContainer as HTMLElement).style.filter = "invert(0.96)";
       (pdfContainer as HTMLElement).style.transition = "filter 0.2s ease-in-out";
     } else {
       (pdfContainer as HTMLElement).style.filter = "none";
@@ -210,7 +211,21 @@ export function PdfViewerWrapper({ pdfId, blobUrl, theme, pdfDarkMode }: PdfView
       <PDFViewer
         config={{
           src: blobUrl,
-          theme: { preference: theme },
+          theme: {
+            preference: theme,
+            light: {
+              background: {
+                app: "#ffffff",
+                surface: "#f5f5f5",
+              },
+            },
+            dark: {
+              background: {
+                app: "#0a0a0a",
+                surface: "#1a1a1a",
+              },
+            },
+          },
         }}
         style={{ width: "100%", height: "100%" }}
         onReady={handleReady}
