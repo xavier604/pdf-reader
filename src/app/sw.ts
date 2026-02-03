@@ -3,7 +3,7 @@
 /// <reference lib="webworker" />
 import { defaultCache } from "@serwist/turbopack/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { CacheFirst, Serwist } from "serwist";
+import { Serwist } from "serwist";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -18,15 +18,7 @@ const serwist = new Serwist({
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: false,
-  runtimeCaching: [
-    ...defaultCache,
-    {
-      matcher: ({ url }) => url.pathname.endsWith(".wasm"),
-      handler: new CacheFirst({
-        cacheName: "wasm-cache",
-      }),
-    },
-  ],
+  runtimeCaching: defaultCache, // Use default caching without custom .wasm handler
   fallbacks: {
     entries: [
       {

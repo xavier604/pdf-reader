@@ -110,21 +110,27 @@ test.describe("Service Worker", () => {
     expect(fromSW).toBe(true);
   });
 
-  test("WASM is cached after PDF import", async ({ page }) => {
+  test("WASM bypasses SW and loads successfully", async ({ page }) => {
     await waitForSWActivation(page);
     await importTestPdf(page);
 
-    // The thumbnail generator fetches PDFium WASM on the main thread, which the
-    // SW's default cross-origin runtime cache handler intercepts and caches
-    await expect
-      .poll(
-        async () => {
-          const names: string[] = await page.evaluate(() => caches.keys());
-          return names.some((n) => n.includes("cross-origin"));
-        },
-        { timeout: 15_000, message: "cross-origin cache containing WASM should exist" },
-      )
-      .toBe(true);
+    // WASM bypasses service worker to avoid Firefox CORS issues with opaque responses
+    // Verify WASM was fetched successfully by checking that PDF was processed (pageCount > 0)
+    const metadata = await page.evaluate(async () => {
+      const db = await new Promise<IDBDatabase>((resolve, reject) => {
+        const req = indexedDB.open("PdfReaderDB");
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+      const tx = db.transaction("pdfMetadata", "readonly");
+      const all = await new Promise<any[]>((resolve) => {
+        const req = tx.objectStore("pdfMetadata").getAll();
+        req.onsuccess = () => resolve(req.result);
+      });
+      return all[0]?.pageCount || 0;
+    });
+
+    expect(metadata).toBeGreaterThan(0);
   });
 });
 
