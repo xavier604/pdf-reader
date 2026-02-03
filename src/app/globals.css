@@ -68,3 +68,5 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-secondary);
 }
+
+/* PDF dark mode is now handled via JavaScript to target canvas elements only */

@@ -2,9 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
+import { PdfDarkModeToggle } from "@/components/reader/PdfDarkModeToggle";
 import { PdfViewerWrapper } from "@/components/reader/PdfViewerWrapper";
 import { useThemeContext } from "@/components/shared/ThemeProvider";
 import { useKeyboard } from "@/lib/hooks/useKeyboard";
+import { usePdfDarkMode } from "@/lib/hooks/usePdfDarkMode";
 import { usePdfLoader } from "@/lib/hooks/usePdfLoader";
 
 interface ReaderViewProps {
@@ -15,6 +17,7 @@ export function ReaderView({ pdfId }: ReaderViewProps) {
   const router = useRouter();
   const { blobUrl, loading: pdfLoading, error: pdfError } = usePdfLoader(pdfId);
   const { resolvedTheme } = useThemeContext();
+  const { pdfDarkMode, togglePdfDarkMode } = usePdfDarkMode();
 
   const handleBack = useCallback(() => {
     router.push("/");
@@ -86,7 +89,13 @@ export function ReaderView({ pdfId }: ReaderViewProps) {
 
   return (
     <div className="h-screen bg-(--color-background)">
-      <PdfViewerWrapper pdfId={pdfId} blobUrl={blobUrl} theme={resolvedTheme} />
+      <PdfViewerWrapper
+        pdfId={pdfId}
+        blobUrl={blobUrl}
+        theme={resolvedTheme}
+        pdfDarkMode={pdfDarkMode}
+      />
+      <PdfDarkModeToggle enabled={pdfDarkMode} onToggle={togglePdfDarkMode} />
     </div>
   );
 }

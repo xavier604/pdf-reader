@@ -9,13 +9,45 @@ interface PdfViewerWrapperProps {
   pdfId: string;
   blobUrl: string;
   theme: "light" | "dark";
+  pdfDarkMode: boolean;
 }
 
-export function PdfViewerWrapper({ pdfId, blobUrl, theme }: PdfViewerWrapperProps) {
+// Helper function to apply dark mode filter to PDF content
+function applyDarkModeFilter(container: HTMLElement, enabled: boolean): boolean {
+  const embedpdf = container.querySelector("embedpdf-container");
+  if (!embedpdf) return false;
+
+  // Try to access shadow DOM
+  const shadowRoot = (embedpdf as any).shadowRoot;
+  if (!shadowRoot) return false;
+
+  // Target the inline-block div that contains actual PDF pages
+  // This avoids inverting the bg-bg-app background
+  const documentContent = shadowRoot.querySelector("#document-content");
+  if (!documentContent) return false;
+
+  // Find the inline-block container that holds the PDF pages
+  const pdfContainer = documentContent.querySelector('div[style*="display: inline-block"]');
+
+  if (pdfContainer) {
+    if (enabled) {
+      (pdfContainer as HTMLElement).style.filter = "invert(1) hue-rotate(180deg)";
+      (pdfContainer as HTMLElement).style.transition = "filter 0.2s ease-in-out";
+    } else {
+      (pdfContainer as HTMLElement).style.filter = "none";
+    }
+    return true;
+  }
+
+  return false;
+}
+
+export function PdfViewerWrapper({ pdfId, blobUrl, theme, pdfDarkMode }: PdfViewerWrapperProps) {
   const registryRef = useRef<any>(null);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const restoredRef = useRef(false);
   const unsubscribesRef = useRef<Array<() => void>>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
   const debouncedSaveState = useCallback(
     (page: number, zoom: number) => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
@@ -34,6 +66,13 @@ export function PdfViewerWrapper({ pdfId, blobUrl, theme }: PdfViewerWrapperProp
       const scrollCap = registry.getPlugin("scroll")?.provides();
 
       if (!scrollCap) return;
+
+      // Apply dark mode filter after PDF is ready
+      setTimeout(() => {
+        if (containerRef.current && pdfDarkMode) {
+          applyDarkModeFilter(containerRef.current, pdfDarkMode);
+        }
+      }, 500);
 
       // Restore saved state once the initial layout is ready (per EmbedPDF docs).
       // The IndexedDB read MUST happen inside the handler because on repeat visits
@@ -88,8 +127,50 @@ export function PdfViewerWrapper({ pdfId, blobUrl, theme }: PdfViewerWrapperProp
       });
       unsubscribesRef.current.push(unsubPage);
     },
-    [pdfId, debouncedSaveState],
+    [pdfId, debouncedSaveState, pdfDarkMode],
   );
+
+  // Apply dark mode filter to canvas elements only
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    let retryCount = 0;
+    const maxRetries = 15;
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const tryApply = () => {
+      if (!containerRef.current) return;
+
+      const success = applyDarkModeFilter(containerRef.current, pdfDarkMode);
+
+      if (!success && retryCount < maxRetries) {
+        retryCount++;
+        timeoutId = setTimeout(tryApply, 200);
+      }
+    };
+
+    // Try to apply with retries
+    tryApply();
+
+    // Also observe for new canvases being added (for multi-page rendering)
+    const observer = new MutationObserver(() => {
+      if (containerRef.current) {
+        applyDarkModeFilter(containerRef.current, pdfDarkMode);
+      }
+    });
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current, {
+        childList: true,
+        subtree: true,
+      });
+    }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      observer.disconnect();
+    };
+  }, [pdfDarkMode]);
 
   // Save annotations on unmount
   useEffect(() => {
@@ -120,7 +201,12 @@ export function PdfViewerWrapper({ pdfId, blobUrl, theme }: PdfViewerWrapperProp
   }, [pdfId]);
 
   return (
-    <div className="h-full w-full" data-testid="pdf-viewer-container">
+    <div
+      ref={containerRef}
+      className="h-full w-full"
+      data-testid="pdf-viewer-container"
+      data-pdf-dark-mode={pdfDarkMode ? "true" : "false"}
+    >
       <PDFViewer
         config={{
           src: blobUrl,
