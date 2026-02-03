@@ -88,6 +88,37 @@ async function capture() {
   await page.screenshot({ path: path.join(SCREENSHOTS_DIR, "reader-dark.png") });
   console.log("Captured reader-dark.png");
 
+  // --- PDF Dark Mode screenshots ---
+  // Dark mode reader with PDF dark mode enabled
+  const pdfDarkModeButton = page.getByRole("button", { name: /Enable PDF dark mode/i });
+  await pdfDarkModeButton.click();
+  await page.waitForTimeout(2500); // Wait for filter to apply
+  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, "reader-dark-pdf-inverted.png") });
+  console.log("Captured reader-dark-pdf-inverted.png");
+
+  // Light mode reader with PDF dark mode enabled
+  await page.evaluate(() => {
+    localStorage.setItem("pdf-reader-theme", "light");
+  });
+  await page.reload();
+  await page.waitForLoadState("networkidle");
+  await container.waitFor({ state: "visible", timeout: 30_000 });
+  await container.locator("canvas").first().waitFor({ state: "attached", timeout: 30_000 });
+  await page.waitForTimeout(2000);
+
+  // PDF dark mode persists, so check current state and enable if needed
+  const pdfDarkModeButtonLight = page.getByRole("button", { name: /PDF dark mode/i });
+  const buttonText = await pdfDarkModeButtonLight.textContent();
+  if (buttonText?.includes("Enable")) {
+    await pdfDarkModeButtonLight.click();
+    await page.waitForTimeout(2500); // Wait for filter to apply
+  } else {
+    // Already enabled, just wait a bit
+    await page.waitForTimeout(500);
+  }
+  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, "reader-light-pdf-inverted.png") });
+  console.log("Captured reader-light-pdf-inverted.png");
+
   await browser.close();
   console.log("All screenshots captured!");
 }

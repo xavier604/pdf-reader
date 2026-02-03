@@ -26,6 +26,10 @@ Most PDF readers either require a server, upload your files to the cloud, or lac
 |:---:|:---:|
 | ![Reader — light theme](screenshots/reader-light.png) | ![Reader — dark theme](screenshots/reader-dark.png) |
 
+| PDF Dark Mode (light app theme) | PDF Dark Mode (dark app theme) |
+|:---:|:---:|
+| ![PDF dark mode in light app theme](screenshots/reader-light-pdf-inverted.png) | ![PDF dark mode in dark app theme](screenshots/reader-dark-pdf-inverted.png) |
+
 ## Features
 
 - Import PDFs via file picker or drag-and-drop
