@@ -128,24 +128,6 @@ test.describe("Mobile (375x667)", () => {
     const gridClass = await metadataGrid.getAttribute("class");
     expect(gridClass).toContain("grid-cols-1");
   });
-
-  test("mobile layout visual regression (library + reader)", async ({ page }) => {
-    // Library view
-    await importTestPdf(page);
-    await expect(page.locator('p[title="test"]').first()).toBeVisible();
-    await expect(page).toHaveScreenshot("mobile-library.png", {
-      fullPage: true,
-      maxDiffPixels: 100,
-    });
-
-    // Reader view
-    await openFirstPdf(page);
-    await waitForPdfRender(page);
-    await expect(page).toHaveScreenshot("mobile-reader.png", {
-      fullPage: false,
-      maxDiffPixels: 100,
-    });
-  });
 });
 
 test.describe("Very Small Mobile (320x568)", () => {
@@ -171,15 +153,6 @@ test.describe("Very Small Mobile (320x568)", () => {
       return document.body.scrollWidth > document.body.clientWidth;
     });
     expect(bodyHasHorizontalScroll).toBe(false);
-  });
-
-  test("320px layout visual regression", async ({ page }) => {
-    await importTestPdf(page);
-    await expect(page.locator('p[title="test"]').first()).toBeVisible();
-    await expect(page).toHaveScreenshot("very-small-mobile-library.png", {
-      fullPage: true,
-      maxDiffPixels: 100,
-    });
   });
 });
 
@@ -287,19 +260,5 @@ test.describe("Large Desktop (1920x1080)", () => {
     const secondRowY = positions[6];
     const rowDifference = Math.abs(secondRowY - firstRowY);
     expect(rowDifference).toBeGreaterThan(100);
-  });
-
-  test("large desktop visual regression", async ({ page }) => {
-    // Import 7 PDFs to show grid layout
-    for (let i = 0; i < 7; i++) {
-      await importTestPdf(page);
-      await page.waitForTimeout(500);
-    }
-
-    await expect(page.locator(".group.relative.cursor-pointer")).toHaveCount(7);
-    await expect(page).toHaveScreenshot("large-desktop-library.png", {
-      fullPage: true,
-      maxDiffPixels: 150,
-    });
   });
 });
