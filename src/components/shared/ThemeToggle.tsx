@@ -93,7 +93,7 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={() => setTheme(next)}
-      className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+      className="p-3 sm:p-2 min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
       title={`Current: ${themeLabel[theme]}. Switch to ${themeLabel[next]}`}
       aria-label={`Current theme: ${themeLabel[theme]}. Switch to ${themeLabel[next]}`}
     >

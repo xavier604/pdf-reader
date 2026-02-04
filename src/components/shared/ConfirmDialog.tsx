@@ -30,12 +30,12 @@ export function ConfirmDialog({
       onCancel={handleCancel}
       className="bg-(--color-surface) text-(--color-foreground) rounded-xl p-0 max-w-sm w-full shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm"
     >
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <h3 className="text-lg font-semibold mb-2">{title}</h3>
         <p className="text-(--color-text-secondary) text-sm">{description}</p>
       </div>
 
-      <div className="flex justify-end gap-3 px-6 pb-6">
+      <div className="flex justify-end gap-2 sm:gap-3 px-4 sm:px-6 pb-4 sm:pb-6">
         <button
           type="button"
           onClick={onCancel}

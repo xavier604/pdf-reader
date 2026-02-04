@@ -47,7 +47,7 @@ export function UndoToast({ message, onUndo, onDismiss, duration = 5000 }: UndoT
   return (
     <output
       aria-live="polite"
-      className="fixed bottom-6 left-6 z-50 bg-(--color-surface) border border-(--color-border) rounded-lg shadow-lg max-w-sm overflow-hidden animate-slide-up block"
+      className="fixed bottom-20 left-4 sm:bottom-6 sm:left-6 z-50 bg-(--color-surface) border border-(--color-border) rounded-lg shadow-lg max-w-[calc(100vw-2rem)] sm:max-w-sm overflow-hidden animate-slide-up block"
     >
       <div className="px-4 py-3 flex items-center gap-3">
         <span className="text-sm text-(--color-foreground) flex-1">{message}</span>
@@ -61,7 +61,7 @@ export function UndoToast({ message, onUndo, onDismiss, duration = 5000 }: UndoT
         <button
           type="button"
           onClick={onDismiss}
-          className="shrink-0 p-0.5 hover:bg-(--color-surface-hover) rounded transition-colors text-(--color-text-secondary)"
+          className="shrink-0 p-2 sm:p-0.5 min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 hover:bg-(--color-surface-hover) rounded transition-colors text-(--color-text-secondary)"
           aria-label="Dismiss"
         >
           <svg

@@ -98,55 +98,66 @@ export function LibraryContent({
       {/* Header */}
       <header className="sticky top-0 z-20 bg-(--color-background)/95 backdrop-blur-sm border-b border-(--color-border)">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <h1 className="text-xl font-bold text-(--color-foreground) shrink-0">PDF Reader</h1>
-            <div className="flex-1 max-w-md">
-              <SearchBar value={searchQuery} onChange={setSearchQuery} />
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <SortMenu
-                sortField={sortField}
-                sortOrder={sortOrder}
-                onSortChange={handleSortChange}
-              />
-              {pdfs.length > 0 && (
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            {/* Top row: Title + utility buttons */}
+            <div className="flex items-center justify-between gap-4">
+              <h1 className="text-responsive-xl font-bold text-(--color-foreground) shrink-0">
+                PDF Reader
+              </h1>
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
-                  onClick={() => (selectionMode ? onCancelSelection() : onEnterSelectionMode())}
-                  className="px-3 py-2 text-sm font-medium rounded-lg bg-(--color-surface-hover) text-(--color-foreground) hover:bg-(--color-border) transition-colors"
+                  onClick={() => setShortcutsOpen(true)}
+                  className="p-2 rounded-lg bg-(--color-surface-hover) text-(--color-foreground) hover:bg-(--color-border) transition-colors focus:outline-none focus:ring-2 focus:ring-(--color-accent)"
+                  aria-label="Keyboard shortcuts"
                 >
-                  {selectionMode ? "Cancel" : "Select"}
+                  <svg
+                    aria-hidden="true"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="10" cy="10" r="8" />
+                    <path d="M7.5 7.5a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3" />
+                    <circle cx="10" cy="14" r="0.5" fill="currentColor" />
+                  </svg>
                 </button>
-              )}
-              <FileUploadContainer
-                onOpenFileDialog={handleOpenFileDialog}
-                isImporting={isImporting}
-                error={error}
-                clearError={clearError}
-              />
-              <button
-                type="button"
-                onClick={() => setShortcutsOpen(true)}
-                className="p-2 rounded-lg bg-(--color-surface-hover) text-(--color-foreground) hover:bg-(--color-border) transition-colors focus:outline-none focus:ring-2 focus:ring-(--color-accent)"
-                aria-label="Keyboard shortcuts"
-              >
-                <svg
-                  aria-hidden="true"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="10" cy="10" r="8" />
-                  <path d="M7.5 7.5a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3" />
-                  <circle cx="10" cy="14" r="0.5" fill="currentColor" />
-                </svg>
-              </button>
-              <ThemeToggle />
+                <ThemeToggle />
+              </div>
+            </div>
+
+            {/* Second row: Search + actions */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 sm:flex-1">
+              <div className="flex-1 w-full sm:max-w-md">
+                <SearchBar value={searchQuery} onChange={setSearchQuery} />
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <SortMenu
+                  sortField={sortField}
+                  sortOrder={sortOrder}
+                  onSortChange={handleSortChange}
+                />
+                {pdfs.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => (selectionMode ? onCancelSelection() : onEnterSelectionMode())}
+                    className="px-3 py-2 text-sm font-medium rounded-lg bg-(--color-surface-hover) text-(--color-foreground) hover:bg-(--color-border) transition-colors"
+                  >
+                    {selectionMode ? "Cancel" : "Select"}
+                  </button>
+                )}
+                <FileUploadContainer
+                  onOpenFileDialog={handleOpenFileDialog}
+                  isImporting={isImporting}
+                  error={error}
+                  clearError={clearError}
+                />
+              </div>
             </div>
           </div>
         </div>

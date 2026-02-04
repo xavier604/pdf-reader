@@ -6,7 +6,7 @@ interface EmptyStateProps {
 
 export function EmptyState({ onOpenFile }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
+    <div className="flex flex-col items-center justify-center py-16 sm:py-24 px-4 text-center">
       {/* Document icon */}
       <svg
         aria-hidden="true"
@@ -28,7 +28,9 @@ export function EmptyState({ onOpenFile }: EmptyStateProps) {
         <line x1="22" y1="48" x2="34" y2="48" />
       </svg>
 
-      <h2 className="text-xl font-semibold text-(--color-foreground) mb-2">No PDFs yet</h2>
+      <h2 className="text-responsive-xl font-semibold text-(--color-foreground) mb-2">
+        No PDFs yet
+      </h2>
 
       <p className="text-(--color-text-secondary) mb-6">Drop a PDF here or click to open</p>
 

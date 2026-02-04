@@ -31,12 +31,12 @@ export function FileDetailsModal({ isOpen, pdf, onClose, onOpen }: FileDetailsMo
       {pdf && (
         <>
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-(--color-border)">
-            <h3 className="text-lg font-semibold truncate">{displayTitle}</h3>
+          <div className="flex items-center justify-between p-3 sm:p-4 border-b border-(--color-border)">
+            <h3 className="text-responsive-lg font-semibold truncate">{displayTitle}</h3>
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-(--color-surface-hover) text-(--color-text-secondary) transition-colors"
+              className="p-2 sm:p-1.5 min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 rounded-lg hover:bg-(--color-surface-hover) text-(--color-text-secondary) transition-colors"
               aria-label="Close"
             >
               <svg
@@ -57,8 +57,8 @@ export function FileDetailsModal({ isOpen, pdf, onClose, onOpen }: FileDetailsMo
           </div>
 
           {/* Thumbnail */}
-          <div className="p-4 flex justify-center">
-            <div className="aspect-[3/4] bg-(--color-surface-hover) rounded-lg overflow-hidden max-h-48 w-auto">
+          <div className="p-3 sm:p-4 flex justify-center">
+            <div className="aspect-[3/4] bg-(--color-surface-hover) rounded-lg overflow-hidden max-h-40 sm:max-h-48 w-auto">
               {thumbnailUrl ? (
                 // biome-ignore lint/performance/noImgElement: blob URL thumbnails are not compatible with next/image
                 <img
@@ -93,7 +93,7 @@ export function FileDetailsModal({ isOpen, pdf, onClose, onOpen }: FileDetailsMo
           </div>
 
           {/* Metadata grid */}
-          <div className="px-4 pb-4 grid grid-cols-2 gap-x-4 gap-y-2">
+          <div className="px-4 pb-4 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 sm:gap-y-2">
             <div>
               <p className="text-xs text-(--color-text-secondary) uppercase tracking-wide">
                 File name
@@ -135,7 +135,7 @@ export function FileDetailsModal({ isOpen, pdf, onClose, onOpen }: FileDetailsMo
           </div>
 
           {/* Footer */}
-          <div className="flex justify-end gap-3 p-4 border-t border-(--color-border)">
+          <div className="flex justify-end gap-2 sm:gap-3 p-3 sm:p-4 border-t border-(--color-border)">
             <button
               type="button"
               onClick={onClose}

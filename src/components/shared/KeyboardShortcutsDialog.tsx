@@ -26,7 +26,7 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
       onCancel={handleCancel}
       className="bg-(--color-surface) text-(--color-foreground) rounded-xl p-0 max-w-sm w-full shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm"
     >
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <h3 className="text-lg font-semibold mb-4">Keyboard Shortcuts</h3>
         <ul className="space-y-3">
           {shortcuts.map((shortcut) => (
@@ -47,7 +47,7 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
         </ul>
       </div>
 
-      <div className="flex justify-end px-6 pb-6">
+      <div className="flex justify-end px-4 sm:px-6 pb-4 sm:pb-6">
         <button
           type="button"
           onClick={onClose}

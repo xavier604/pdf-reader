@@ -69,7 +69,7 @@ export function SortMenu({ sortField, sortOrder, onSortChange }: SortMenuProps) 
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
         aria-haspopup="true"
-        className="px-3 py-2 text-sm font-medium rounded-lg bg-(--color-surface-hover) text-(--color-foreground) hover:bg-(--color-border) transition-colors flex items-center gap-1.5"
+        className="px-4 py-3 sm:px-3 sm:py-2 min-h-11 sm:min-h-0 text-sm font-medium rounded-lg bg-(--color-surface-hover) text-(--color-foreground) hover:bg-(--color-border) transition-colors flex items-center gap-1.5"
       >
         <svg
           aria-hidden="true"

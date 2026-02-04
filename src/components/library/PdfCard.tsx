@@ -103,10 +103,10 @@ export function PdfCard({
         <button
           type="button"
           onClick={handleToggleStar}
-          className={`absolute top-2 left-2 z-10 p-1.5 rounded-lg bg-(--color-surface)/90 backdrop-blur-sm transition-opacity hover:text-amber-400 ${
+          className={`absolute top-2 left-2 z-10 p-2 sm:p-2 min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 rounded-lg bg-(--color-surface)/90 backdrop-blur-sm transition-opacity hover:text-amber-400 ${
             pdf.starred
               ? "text-amber-400"
-              : "text-(--color-text-secondary) opacity-0 group-hover:opacity-100"
+              : "text-(--color-text-secondary) sm:opacity-0 sm:group-hover:opacity-100"
           }`}
           aria-label={pdf.starred ? `Unstar ${pdf.title}` : `Star ${pdf.title}`}
         >
@@ -130,7 +130,7 @@ export function PdfCard({
           <button
             type="button"
             onClick={handleShowDetails}
-            className="p-1.5 rounded-lg bg-(--color-surface)/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-(--color-accent) hover:text-white text-(--color-text-secondary)"
+            className="p-2 sm:p-2 min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 flex items-center justify-center rounded-lg bg-(--color-surface)/90 backdrop-blur-sm sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-(--color-accent) hover:text-white text-(--color-text-secondary)"
             aria-label={`Details for ${pdf.title}`}
           >
             <svg
@@ -152,7 +152,7 @@ export function PdfCard({
           <button
             type="button"
             onClick={handleDelete}
-            className="p-1.5 rounded-lg bg-(--color-surface)/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-(--color-danger) hover:text-white text-(--color-text-secondary)"
+            className="p-2 sm:p-2 min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 flex items-center justify-center rounded-lg bg-(--color-surface)/90 backdrop-blur-sm sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-(--color-danger) hover:text-white text-(--color-text-secondary)"
             aria-label={`Delete ${pdf.title}`}
           >
             <svg
@@ -207,7 +207,10 @@ export function PdfCard({
 
       {/* Metadata */}
       <div className="p-3">
-        <p className="text-sm font-medium text-(--color-foreground) truncate" title={pdf.title}>
+        <p
+          className="text-responsive-sm font-medium text-(--color-foreground) truncate"
+          title={pdf.title}
+        >
           {truncateFileName(pdf.title, 30)}
         </p>
         <div className="flex items-center justify-between mt-1">

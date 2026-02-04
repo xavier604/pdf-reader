@@ -19,14 +19,14 @@ export function FileUploadContainer({
       <button
         type="button"
         onClick={onOpenFileDialog}
-        className="px-4 py-2 text-sm font-medium bg-(--color-accent) text-white rounded-lg hover:bg-(--color-accent-hover) transition-colors focus:outline-none focus:ring-2 focus:ring-(--color-accent) focus:ring-offset-2"
+        className="px-4 py-3 sm:py-2 min-h-11 sm:min-h-0 text-sm font-medium bg-(--color-accent) text-white rounded-lg hover:bg-(--color-accent-hover) transition-colors focus:outline-none focus:ring-2 focus:ring-(--color-accent) focus:ring-offset-2"
       >
         Open PDF
       </button>
 
       {/* Loading indicator */}
       {isImporting && (
-        <div className="fixed bottom-20 right-6 z-40 bg-(--color-surface) border border-(--color-border) rounded-lg px-4 py-3 shadow-lg flex items-center gap-3">
+        <div className="fixed bottom-[5.5rem] right-4 sm:bottom-20 sm:right-6 z-40 bg-(--color-surface) border border-(--color-border) rounded-lg px-4 py-3 shadow-lg flex items-center gap-3">
           <svg
             aria-hidden="true"
             className="animate-spin text-(--color-accent)"
@@ -49,7 +49,7 @@ export function FileUploadContainer({
 
       {/* Error toast */}
       {error && (
-        <div className="fixed bottom-6 right-6 z-50 max-w-sm bg-(--color-danger) text-white rounded-lg px-4 py-3 shadow-lg flex items-start gap-3">
+        <div className="fixed top-4 right-4 sm:bottom-6 sm:right-6 sm:top-auto z-50 max-w-[calc(100vw-2rem)] sm:max-w-sm bg-(--color-danger) text-white rounded-lg px-4 py-3 shadow-lg flex items-start gap-3">
           <p className="text-sm flex-1 whitespace-pre-line">{error}</p>
           <button
             type="button"

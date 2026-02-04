@@ -38,7 +38,7 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
         <button
           type="button"
           onClick={() => onChange("")}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-(--color-text-secondary) hover:text-(--color-foreground) transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-2 sm:p-1 min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 text-(--color-text-secondary) hover:text-(--color-foreground) transition-colors"
           aria-label="Clear search"
         >
           <svg

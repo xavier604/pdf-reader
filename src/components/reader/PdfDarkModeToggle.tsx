@@ -10,7 +10,7 @@ export function PdfDarkModeToggle({ enabled, onToggle }: PdfDarkModeToggleProps)
     <button
       type="button"
       onClick={onToggle}
-      className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-(--color-surface) border border-(--color-border) rounded-lg shadow-lg hover:bg-(--color-surface-hover) transition-colors"
+      className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-3 bg-(--color-surface) border border-(--color-border) rounded-lg shadow-lg hover:bg-(--color-surface-hover) transition-colors"
       title={enabled ? "Disable PDF dark mode" : "Enable PDF dark mode"}
       aria-label={enabled ? "Disable PDF dark mode" : "Enable PDF dark mode"}
     >
