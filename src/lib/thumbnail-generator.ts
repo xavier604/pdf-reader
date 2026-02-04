@@ -1,7 +1,5 @@
 import type { PdfEngine } from "@embedpdf/engines";
-
-const THUMBNAIL_WIDTH = 300;
-const JPEG_QUALITY = 0.85;
+import { JPEG_QUALITY, THUMBNAIL_WIDTH } from "@/config/constants";
 
 let enginePromise: Promise<PdfEngine<Blob>> | null = null;
 

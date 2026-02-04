@@ -1,19 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { BulkActionBar } from "@/components/library/BulkActionBar";
-import { DropZone } from "@/components/library/DropZone";
-import { EmptyState } from "@/components/library/EmptyState";
-import { FileDetailsModal } from "@/components/library/FileDetailsModal";
-import { PdfGrid } from "@/components/library/PdfGrid";
-import { SearchBar } from "@/components/library/SearchBar";
-import { SortMenu } from "@/components/library/SortMenu";
-import { StorageIndicator } from "@/components/library/StorageIndicator";
-import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { KeyboardShortcutsDialog } from "@/components/shared/KeyboardShortcutsDialog";
-import { ThemeToggle } from "@/components/shared/ThemeToggle";
-import { UndoToast } from "@/components/shared/UndoToast";
+import { useCallback, useRef, useState } from "react";
+import { DeletionContainer } from "@/components/library/DeletionContainer";
+import { LibraryContent } from "@/components/library/LibraryContent";
+import { SelectionModeContainer } from "@/components/library/SelectionModeContainer";
 import { useLibrary } from "@/lib/hooks/useLibrary";
 import type { PdfMetadata } from "@/types";
 
@@ -41,13 +32,6 @@ export function LibraryView() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const pdfsRef = useRef(pdfs);
   pdfsRef.current = pdfs;
-  const [deleteTarget, setDeleteTarget] = useState<{
-    id: string;
-    title: string;
-  } | null>(null);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [selectionMode, setSelectionMode] = useState(false);
-  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [detailsTarget, setDetailsTarget] = useState<PdfMetadata | null>(null);
 
@@ -62,54 +46,6 @@ export function LibraryView() {
     [router],
   );
 
-  const handlePdfDelete = useCallback((id: string) => {
-    const pdf = pdfsRef.current.find((p) => p.id === id);
-    if (pdf) {
-      setDeleteTarget({ id: pdf.id, title: pdf.title });
-    }
-  }, []);
-
-  const handleConfirmDelete = useCallback(async () => {
-    if (deleteTarget) {
-      await removePdf(deleteTarget.id);
-      setDeleteTarget(null);
-    }
-  }, [deleteTarget, removePdf]);
-
-  const handleToggleSelect = useCallback((id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  }, []);
-
-  const handleToggleAll = useCallback(() => {
-    setSelectedIds((prev) => {
-      if (prev.size === pdfs.length) {
-        return new Set();
-      }
-      return new Set(pdfs.map((p) => p.id));
-    });
-  }, [pdfs]);
-
-  const handleCancelSelection = useCallback(() => {
-    setSelectedIds(new Set());
-    setSelectionMode(false);
-  }, []);
-
-  const handleBulkDelete = useCallback(async () => {
-    const ids = Array.from(selectedIds);
-    await removePdfs(ids);
-    setSelectedIds(new Set());
-    setSelectionMode(false);
-    setBulkDeleteOpen(false);
-  }, [selectedIds, removePdfs]);
-
   const handleShowDetails = useCallback((id: string) => {
     const pdf = pdfsRef.current.find((p) => p.id === id);
     if (pdf) setDetailsTarget(pdf);
@@ -122,227 +58,60 @@ export function LibraryView() {
     }
   }, [detailsTarget, router]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement;
-      const tagName = target.tagName.toLowerCase();
-      if (tagName === "input" || tagName === "textarea" || target.isContentEditable) return;
-
-      if (e.key === "Escape" && selectionMode) {
-        handleCancelSelection();
-      }
-      if (e.key === "?") {
-        setShortcutsOpen(true);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectionMode, handleCancelSelection]);
-
   const hasNoPdfs = pdfs.length === 0 && !searchQuery;
   const hasNoResults = pdfs.length === 0 && searchQuery.length > 0;
 
   return (
-    <DropZone onFilesDropped={importFiles} fileInputRef={fileInputRef}>
-      {/* Header */}
-      <header className="sticky top-0 z-20 bg-(--color-background)/95 backdrop-blur-sm border-b border-(--color-border)">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <h1 className="text-xl font-bold text-(--color-foreground) shrink-0">PDF Reader</h1>
-            <div className="flex-1 max-w-md">
-              <SearchBar value={searchQuery} onChange={setSearchQuery} />
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <SortMenu
-                sortField={sortField}
-                sortOrder={sortOrder}
-                onSortChange={handleSortChange}
-              />
-              {pdfs.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => (selectionMode ? handleCancelSelection() : setSelectionMode(true))}
-                  className="px-3 py-2 text-sm font-medium rounded-lg bg-(--color-surface-hover) text-(--color-foreground) hover:bg-(--color-border) transition-colors"
-                >
-                  {selectionMode ? "Cancel" : "Select"}
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={handleOpenFileDialog}
-                className="px-4 py-2 text-sm font-medium bg-(--color-accent) text-white rounded-lg hover:bg-(--color-accent-hover) transition-colors focus:outline-none focus:ring-2 focus:ring-(--color-accent) focus:ring-offset-2"
-              >
-                Open PDF
-              </button>
-              <button
-                type="button"
-                onClick={() => setShortcutsOpen(true)}
-                className="p-2 rounded-lg bg-(--color-surface-hover) text-(--color-foreground) hover:bg-(--color-border) transition-colors focus:outline-none focus:ring-2 focus:ring-(--color-accent)"
-                aria-label="Keyboard shortcuts"
-              >
-                <svg
-                  aria-hidden="true"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="10" cy="10" r="8" />
-                  <path d="M7.5 7.5a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3" />
-                  <circle cx="10" cy="14" r="0.5" fill="currentColor" />
-                </svg>
-              </button>
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Bulk action bar */}
-      {selectionMode && (
-        <BulkActionBar
-          selectedCount={selectedIds.size}
-          totalCount={pdfs.length}
-          allSelected={selectedIds.size === pdfs.length && pdfs.length > 0}
-          onToggleAll={handleToggleAll}
-          onCancel={handleCancelSelection}
-          onDelete={() => setBulkDeleteOpen(true)}
-        />
-      )}
-
-      {/* Main content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {hasNoPdfs && <EmptyState onOpenFile={handleOpenFileDialog} />}
-
-        {pdfs.length > 0 && (
-          <PdfGrid
-            pdfs={pdfs}
-            onPdfClick={handlePdfClick}
-            onPdfDelete={handlePdfDelete}
-            selectionMode={selectionMode}
-            selectedIds={selectedIds}
-            onToggleSelect={handleToggleSelect}
-            onToggleStar={handleToggleStar}
-            onShowDetails={handleShowDetails}
-          />
-        )}
-
-        {hasNoResults && (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <svg
-              aria-hidden="true"
-              width="48"
-              height="48"
-              viewBox="0 0 48 48"
-              fill="none"
-              stroke="var(--color-text-secondary)"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="mb-4 opacity-50"
-            >
-              <circle cx="20" cy="20" r="14" />
-              <line x1="30" y1="30" x2="42" y2="42" />
-            </svg>
-            <p className="text-(--color-text-secondary) text-lg">No matching PDFs</p>
-            <p className="text-(--color-text-secondary) text-sm mt-1">
-              Try a different search term
-            </p>
-          </div>
-        )}
-      </main>
-
-      {/* Storage usage */}
-      <StorageIndicator pdfs={pdfs} />
-
-      {/* Loading indicator */}
-      {isImporting && (
-        <div className="fixed bottom-20 right-6 z-40 bg-(--color-surface) border border-(--color-border) rounded-lg px-4 py-3 shadow-lg flex items-center gap-3">
-          <svg
-            aria-hidden="true"
-            className="animate-spin text-(--color-accent)"
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-          >
-            <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="2" opacity="0.25" />
-            <path
-              d="M10 2a8 8 0 0 1 8 8"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
+    <DeletionContainer
+      pdfs={pdfs}
+      removePdf={removePdf}
+      removePdfs={removePdfs}
+      undoMessage={undoMessage}
+      undoDelete={undoDelete}
+      dismissUndo={dismissUndo}
+    >
+      {({ onDeleteRequest, onBulkDeleteInitiate }) => (
+        <SelectionModeContainer pdfs={pdfs} onBulkDeleteInitiate={onBulkDeleteInitiate}>
+          {({
+            selectionMode,
+            selectedIds,
+            onToggleSelect,
+            onEnterSelectionMode,
+            onCancelSelection,
+          }) => (
+            <LibraryContent
+              pdfs={pdfs}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              importFiles={importFiles}
+              isImporting={isImporting}
+              error={error}
+              clearError={clearError}
+              sortField={sortField}
+              sortOrder={sortOrder}
+              handleSortChange={handleSortChange}
+              handleToggleStar={handleToggleStar}
+              fileInputRef={fileInputRef}
+              handleOpenFileDialog={handleOpenFileDialog}
+              handlePdfClick={handlePdfClick}
+              onDeleteRequest={onDeleteRequest}
+              handleShowDetails={handleShowDetails}
+              selectionMode={selectionMode}
+              selectedIds={selectedIds}
+              onToggleSelect={onToggleSelect}
+              onEnterSelectionMode={onEnterSelectionMode}
+              onCancelSelection={onCancelSelection}
+              shortcutsOpen={shortcutsOpen}
+              setShortcutsOpen={setShortcutsOpen}
+              detailsTarget={detailsTarget}
+              setDetailsTarget={setDetailsTarget}
+              handleOpenFromDetails={handleOpenFromDetails}
+              hasNoPdfs={hasNoPdfs}
+              hasNoResults={hasNoResults}
             />
-          </svg>
-          <span className="text-sm text-(--color-foreground)">Importing...</span>
-        </div>
+          )}
+        </SelectionModeContainer>
       )}
-
-      {/* Error toast */}
-      {error && (
-        <div className="fixed bottom-6 right-6 z-50 max-w-sm bg-(--color-danger) text-white rounded-lg px-4 py-3 shadow-lg flex items-start gap-3">
-          <p className="text-sm flex-1 whitespace-pre-line">{error}</p>
-          <button
-            type="button"
-            onClick={clearError}
-            className="shrink-0 p-0.5 hover:bg-white/20 rounded transition-colors"
-            aria-label="Dismiss error"
-          >
-            <svg
-              aria-hidden="true"
-              width="14"
-              height="14"
-              viewBox="0 0 14 14"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="2" y1="2" x2="12" y2="12" />
-              <line x1="12" y1="2" x2="2" y2="12" />
-            </svg>
-          </button>
-        </div>
-      )}
-
-      {/* Undo toast */}
-      {undoMessage && (
-        <UndoToast message={undoMessage} onUndo={undoDelete} onDismiss={dismissUndo} />
-      )}
-
-      {/* Delete confirmation dialog */}
-      <ConfirmDialog
-        isOpen={deleteTarget !== null}
-        title="Delete PDF?"
-        description={`Are you sure you want to delete \u201C${deleteTarget?.title ?? ""}\u201D?`}
-        onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteTarget(null)}
-      />
-
-      {/* Bulk delete confirmation dialog */}
-      <ConfirmDialog
-        isOpen={bulkDeleteOpen}
-        title={`Delete ${selectedIds.size} PDFs?`}
-        description={`Are you sure you want to delete ${selectedIds.size} ${selectedIds.size === 1 ? "PDF" : "PDFs"}?`}
-        onConfirm={handleBulkDelete}
-        onCancel={() => setBulkDeleteOpen(false)}
-      />
-
-      {/* Keyboard shortcuts dialog */}
-      <KeyboardShortcutsDialog isOpen={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
-
-      {/* File details modal */}
-      <FileDetailsModal
-        isOpen={detailsTarget !== null}
-        pdf={detailsTarget}
-        onClose={() => setDetailsTarget(null)}
-        onOpen={handleOpenFromDetails}
-      />
-    </DropZone>
+    </DeletionContainer>
   );
 }

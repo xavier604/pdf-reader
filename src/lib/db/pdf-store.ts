@@ -1,6 +1,15 @@
 import { db } from "@/lib/db/schema";
 import type { PdfMetadata, SortField, SortOrder } from "@/types";
 
+/**
+ * Helper to handle database errors consistently.
+ * Logs the error with context and throws a user-friendly error message.
+ */
+function handleDbError(operationName: string, userMessage: string, error: unknown): never {
+  console.error(`${operationName} failed:`, error);
+  throw new Error(userMessage);
+}
+
 export async function addPdf(id: string, blob: Blob, metadata: PdfMetadata): Promise<void> {
   try {
     await db.transaction("rw", [db.pdfFiles, db.pdfMetadata], async () => {
@@ -8,8 +17,7 @@ export async function addPdf(id: string, blob: Blob, metadata: PdfMetadata): Pro
       await db.pdfMetadata.add(metadata);
     });
   } catch (error) {
-    console.error("addPdf failed:", error);
-    throw new Error("Failed to save PDF. Storage may be full or unavailable.");
+    handleDbError("addPdf", "Failed to save PDF. Storage may be full or unavailable.", error);
   }
 }
 
@@ -18,8 +26,7 @@ export async function getPdfBlob(id: string): Promise<Blob | undefined> {
     const record = await db.pdfFiles.get(id);
     return record?.blob;
   } catch (error) {
-    console.error("getPdfBlob failed:", error);
-    throw new Error("Failed to load PDF file. Database may be unavailable.");
+    handleDbError("getPdfBlob", "Failed to load PDF file. Database may be unavailable.", error);
   }
 }
 
@@ -27,8 +34,11 @@ export async function updatePdfMetadata(id: string, updates: Partial<PdfMetadata
   try {
     await db.pdfMetadata.update(id, updates);
   } catch (error) {
-    console.error("updatePdfMetadata failed:", error);
-    throw new Error("Failed to update PDF metadata. Database may be unavailable.");
+    handleDbError(
+      "updatePdfMetadata",
+      "Failed to update PDF metadata. Database may be unavailable.",
+      error,
+    );
   }
 }
 
@@ -36,8 +46,11 @@ export async function updatePdfBlob(id: string, blob: Blob): Promise<void> {
   try {
     await db.pdfFiles.update(id, { blob });
   } catch (error) {
-    console.error("updatePdfBlob failed:", error);
-    throw new Error("Failed to update PDF file. Storage may be full or unavailable.");
+    handleDbError(
+      "updatePdfBlob",
+      "Failed to update PDF file. Storage may be full or unavailable.",
+      error,
+    );
   }
 }
 
@@ -50,8 +63,11 @@ export async function toggleStarred(id: string): Promise<void> {
     const starred = !metadata.starred;
     await db.pdfMetadata.update(id, { starred });
   } catch (error) {
-    console.error("toggleStarred failed:", error);
-    throw new Error("Failed to toggle starred status. Database may be unavailable.");
+    handleDbError(
+      "toggleStarred",
+      "Failed to toggle starred status. Database may be unavailable.",
+      error,
+    );
   }
 }
 
@@ -59,8 +75,7 @@ export async function renamePdf(id: string, customTitle: string): Promise<void> 
   try {
     await db.pdfMetadata.update(id, { customTitle, title: customTitle });
   } catch (error) {
-    console.error("renamePdf failed:", error);
-    throw new Error("Failed to rename PDF. Database may be unavailable.");
+    handleDbError("renamePdf", "Failed to rename PDF. Database may be unavailable.", error);
   }
 }
 
@@ -91,8 +106,11 @@ export async function getAllPdfMetadataSorted(
 
     return items;
   } catch (error) {
-    console.error("getAllPdfMetadataSorted failed:", error);
-    throw new Error("Failed to load PDF library. Database may be unavailable.");
+    handleDbError(
+      "getAllPdfMetadataSorted",
+      "Failed to load PDF library. Database may be unavailable.",
+      error,
+    );
   }
 }
 
@@ -104,7 +122,6 @@ export async function deletePdfs(ids: string[]): Promise<void> {
       await db.readingState.bulkDelete(ids);
     });
   } catch (error) {
-    console.error("deletePdfs failed:", error);
-    throw new Error("Failed to delete PDFs. Database may be unavailable.");
+    handleDbError("deletePdfs", "Failed to delete PDFs. Database may be unavailable.", error);
   }
 }

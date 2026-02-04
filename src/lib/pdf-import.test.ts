@@ -9,6 +9,7 @@ vi.mock("@/lib/thumbnail-generator", () => ({
   generateThumbnailAndPageCount: vi.fn().mockResolvedValue({ thumbnail: null, pageCount: 0 }),
 }));
 
+import { MAX_FILE_SIZE_BYTES } from "@/config/constants";
 import { importPdfFile } from "./pdf-import";
 
 function createMockFile(name: string, size: number, type: string): File {
@@ -27,7 +28,11 @@ describe("importPdfFile", () => {
   });
 
   it("rejects files over 500 MB", async () => {
-    const file = createMockFile("huge.pdf", 600 * 1024 * 1024, "application/pdf");
+    const file = createMockFile(
+      "huge.pdf",
+      MAX_FILE_SIZE_BYTES + 100 * 1024 * 1024,
+      "application/pdf",
+    );
     await expect(importPdfFile(file)).rejects.toThrow("File too large");
   });
 
@@ -50,13 +55,13 @@ describe("importPdfFile", () => {
   });
 
   it("accepts a file at exactly 500 MB", async () => {
-    const file = createMockFile("exactly500.pdf", 500 * 1024 * 1024, "application/pdf");
+    const file = createMockFile("exactly500.pdf", MAX_FILE_SIZE_BYTES, "application/pdf");
     const id = await importPdfFile(file);
     expect(id).toBe("test-uuid-1234");
   });
 
   it("rejects a file at 500 MB + 1 byte", async () => {
-    const file = createMockFile("just-over.pdf", 500 * 1024 * 1024 + 1, "application/pdf");
+    const file = createMockFile("just-over.pdf", MAX_FILE_SIZE_BYTES + 1, "application/pdf");
     await expect(importPdfFile(file)).rejects.toThrow("File too large");
   });
 

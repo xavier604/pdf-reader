@@ -1,9 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
+import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB } from "@/config/constants";
 import { addPdf, updatePdfMetadata } from "@/lib/db/pdf-store";
 import { generateThumbnailAndPageCount } from "@/lib/thumbnail-generator";
 import type { PdfMetadata } from "@/types";
-
-const MAX_FILE_SIZE_BYTES = 500 * 1024 * 1024; // 500 MB
 
 export async function importPdfFile(file: File): Promise<string> {
   const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
@@ -16,7 +15,7 @@ export async function importPdfFile(file: File): Promise<string> {
 
   if (file.size > MAX_FILE_SIZE_BYTES) {
     throw new Error(
-      `File too large: "${file.name}" is ${(file.size / (1024 * 1024)).toFixed(0)} MB. Maximum allowed size is 500 MB.`,
+      `File too large: "${file.name}" is ${(file.size / (1024 * 1024)).toFixed(0)} MB. Maximum allowed size is ${MAX_FILE_SIZE_MB} MB.`,
     );
   }
 

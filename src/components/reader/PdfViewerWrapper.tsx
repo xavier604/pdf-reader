@@ -2,6 +2,7 @@
 
 import { PDFViewer } from "@embedpdf/react-pdf-viewer";
 import { useCallback, useEffect, useRef } from "react";
+import { DEBOUNCE_RETRY_DARK_MODE_MS, DEBOUNCE_SAVE_STATE_MS } from "@/config/constants";
 import { updatePdfBlob } from "@/lib/db/pdf-store";
 import { getReadingState, saveReadingState } from "@/lib/db/reading-state-store";
 
@@ -13,34 +14,84 @@ interface PdfViewerWrapperProps {
 }
 
 // Helper function to apply dark mode filter to PDF content
+//
+// IMPORTANT: This implementation is fragile and relies on shadow DOM querying.
+// The EmbedPDF viewer does not currently expose an official API for dark mode styling
+// of PDF content. This is a workaround that targets internal DOM structure which may
+// break in future updates. Consider requesting an official dark mode API from EmbedPDF.
+//
+// Current approach:
+// 1. Query shadow DOM for PDF container element
+// 2. Apply CSS invert filter to the container
+// 3. Fallback to container-level filter if shadow DOM query fails
 function applyDarkModeFilter(container: HTMLElement, enabled: boolean): boolean {
-  const embedpdf = container.querySelector("embedpdf-container");
-  if (!embedpdf) return false;
-
-  // Try to access shadow DOM
-  const shadowRoot = (embedpdf as any).shadowRoot;
-  if (!shadowRoot) return false;
-
-  // Target the inline-block div that contains actual PDF pages
-  // This avoids inverting the bg-bg-app background
-  const documentContent = shadowRoot.querySelector("#document-content");
-  if (!documentContent) return false;
-
-  // Find the inline-block container that holds the PDF pages
-  const pdfContainer = documentContent.querySelector('div[style*="display: inline-block"]');
-
-  if (pdfContainer) {
-    if (enabled) {
-      // invert(0.96) makes white (#ffffff) → #0a0a0a to match app theme
-      (pdfContainer as HTMLElement).style.filter = "invert(0.96)";
-      (pdfContainer as HTMLElement).style.transition = "filter 0.2s ease-in-out";
-    } else {
-      (pdfContainer as HTMLElement).style.filter = "none";
+  try {
+    const embedpdf = container.querySelector("embedpdf-container");
+    if (!embedpdf) {
+      console.warn("EmbedPDF: embedpdf-container not found for dark mode styling");
+      return applyFallbackDarkMode(container, enabled);
     }
-    return true;
-  }
 
-  return false;
+    // Try to access shadow DOM
+    const shadowRoot = (embedpdf as any).shadowRoot;
+    if (!shadowRoot) {
+      console.warn("EmbedPDF: Shadow DOM not accessible for dark mode styling");
+      return applyFallbackDarkMode(container, enabled);
+    }
+
+    // Target the inline-block div that contains actual PDF pages
+    // This avoids inverting the bg-bg-app background
+    const documentContent = shadowRoot.querySelector("#document-content");
+    if (!documentContent) {
+      console.warn("EmbedPDF: #document-content not found in shadow DOM for dark mode styling");
+      return applyFallbackDarkMode(container, enabled);
+    }
+
+    // Find the inline-block container that holds the PDF pages
+    // This selector is brittle and may break if EmbedPDF changes its internal structure
+    const pdfContainer = documentContent.querySelector('div[style*="display: inline-block"]');
+
+    if (pdfContainer) {
+      if (enabled) {
+        // invert(0.96) makes white (#ffffff) → #0a0a0a to match app theme
+        (pdfContainer as HTMLElement).style.filter = "invert(0.96)";
+        (pdfContainer as HTMLElement).style.transition = "filter 0.2s ease-in-out";
+      } else {
+        (pdfContainer as HTMLElement).style.filter = "none";
+      }
+      return true;
+    }
+
+    console.warn(
+      "EmbedPDF: PDF container element not found via shadow DOM query, applying fallback dark mode",
+    );
+    return applyFallbackDarkMode(container, enabled);
+  } catch (error) {
+    console.warn("EmbedPDF: Error applying dark mode via shadow DOM, using fallback:", error);
+    return applyFallbackDarkMode(container, enabled);
+  }
+}
+
+// Fallback: Apply CSS filter to the entire container if shadow DOM query fails
+// This is less ideal as it inverts UI elements too, but ensures users still get
+// a usable dark mode experience even if the shadow DOM structure changes.
+function applyFallbackDarkMode(container: HTMLElement, enabled: boolean): boolean {
+  try {
+    const embedpdf = container.querySelector("embedpdf-container");
+    if (embedpdf) {
+      if (enabled) {
+        (embedpdf as HTMLElement).style.filter = "invert(0.96)";
+        (embedpdf as HTMLElement).style.transition = "filter 0.2s ease-in-out";
+      } else {
+        (embedpdf as HTMLElement).style.filter = "none";
+      }
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.warn("EmbedPDF: Error applying fallback dark mode:", error);
+    return false;
+  }
 }
 
 export function PdfViewerWrapper({ pdfId, blobUrl, theme, pdfDarkMode }: PdfViewerWrapperProps) {
@@ -54,7 +105,7 @@ export function PdfViewerWrapper({ pdfId, blobUrl, theme, pdfDarkMode }: PdfView
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       saveTimeoutRef.current = setTimeout(() => {
         saveReadingState(pdfId, { currentPage: page, zoomLevel: zoom });
-      }, 500);
+      }, DEBOUNCE_SAVE_STATE_MS);
     },
     [pdfId],
   );
@@ -73,7 +124,7 @@ export function PdfViewerWrapper({ pdfId, blobUrl, theme, pdfDarkMode }: PdfView
         if (containerRef.current && pdfDarkMode) {
           applyDarkModeFilter(containerRef.current, pdfDarkMode);
         }
-      }, 500);
+      }, DEBOUNCE_SAVE_STATE_MS);
 
       // Restore saved state once the initial layout is ready (per EmbedPDF docs).
       // The IndexedDB read MUST happen inside the handler because on repeat visits
@@ -146,7 +197,7 @@ export function PdfViewerWrapper({ pdfId, blobUrl, theme, pdfDarkMode }: PdfView
 
       if (!success && retryCount < maxRetries) {
         retryCount++;
-        timeoutId = setTimeout(tryApply, 200);
+        timeoutId = setTimeout(tryApply, DEBOUNCE_RETRY_DARK_MODE_MS);
       }
     };
 
