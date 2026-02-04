@@ -1,9 +1,8 @@
 /// <reference no-default-lib="true" />
 /// <reference lib="esnext" />
 /// <reference lib="webworker" />
-import { defaultCache } from "@serwist/turbopack/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { Serwist } from "serwist";
+import { CacheFirst, NetworkFirst, Serwist } from "serwist";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -18,7 +17,32 @@ const serwist = new Serwist({
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: false,
-  runtimeCaching: defaultCache, // Use default caching without custom .wasm handler
+  // Minimal runtime caching - only same-origin requests to avoid Firefox CORS with WASM
+  runtimeCaching: [
+    // Cache same-origin documents (HTML pages) with network-first strategy
+    {
+      matcher: ({ request, sameOrigin }) => {
+        return sameOrigin && request.destination === "document";
+      },
+      handler: new NetworkFirst({
+        cacheName: "pages-cache",
+      }),
+    },
+    // Cache same-origin static assets (JS, CSS, fonts) with cache-first strategy
+    {
+      matcher: ({ request, sameOrigin }) => {
+        return (
+          sameOrigin &&
+          (request.destination === "script" ||
+            request.destination === "style" ||
+            request.destination === "font")
+        );
+      },
+      handler: new CacheFirst({
+        cacheName: "assets-cache",
+      }),
+    },
+  ],
   fallbacks: {
     entries: [
       {

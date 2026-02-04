@@ -116,18 +116,28 @@ test.describe("Service Worker", () => {
 
     // WASM bypasses service worker to avoid Firefox CORS issues with opaque responses
     // Verify WASM was fetched successfully by checking that PDF was processed (pageCount > 0)
+    // Thumbnail generation is async, so poll until pageCount is populated
     const metadata = await page.evaluate(async () => {
-      const db = await new Promise<IDBDatabase>((resolve, reject) => {
-        const req = indexedDB.open("PdfReaderDB");
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
-      const tx = db.transaction("pdfMetadata", "readonly");
-      const all = await new Promise<any[]>((resolve) => {
-        const req = tx.objectStore("pdfMetadata").getAll();
-        req.onsuccess = () => resolve(req.result);
-      });
-      return all[0]?.pageCount || 0;
+      const start = Date.now();
+      const timeout = 10_000;
+      while (Date.now() - start < timeout) {
+        const db = await new Promise<IDBDatabase>((resolve, reject) => {
+          const req = indexedDB.open("PdfReaderDB");
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+        const tx = db.transaction("pdfMetadata", "readonly");
+        const all = await new Promise<any[]>((resolve) => {
+          const req = tx.objectStore("pdfMetadata").getAll();
+          req.onsuccess = () => resolve(req.result);
+        });
+        const pageCount = all[0]?.pageCount || 0;
+        if (pageCount > 0) {
+          return pageCount;
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      throw new Error("Thumbnail generation did not complete in time");
     });
 
     expect(metadata).toBeGreaterThan(0);
